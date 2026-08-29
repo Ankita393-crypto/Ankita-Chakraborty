@@ -6,9 +6,13 @@ This file provides guidance to AI assistants (Claude and others) working with th
 
 **Repository:** Ankita393-crypto/Ankita-Chakraborty
 **Remote:** Configured via local proxy at `127.0.0.1:33433`
-**Status:** Initial setup — no source code committed yet.
+**Status:** Learnzy pilot — a Next.js 16 (App Router) + TypeScript + Tailwind web app with SQLite (better-sqlite3).
 
-> When source code is added, update this file to reflect the actual technology stack, structure, and conventions.
+- Product: AI-powered learning platform (paid entry quiz unlocks free courses; certificates; EN/HI/BN).
+- Key paths: `app/actions.ts` (all server actions/business logic), `lib/db.ts` (schema), `lib/seed.ts` (demo data), `docs/` (product plan, requirements, owner guide).
+- Build: `npm run build`. Dev: `npm run dev`. Runtime data in `data/` (gitignored).
+- Pilot simulations: test-mode payments, on-screen OTP, AI generation gated on `OPENAI_API_KEY`.
+- The repository owner is non-technical; keep PR descriptions and summaries in plain language.
 
 ---
 
