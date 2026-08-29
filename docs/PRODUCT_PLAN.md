@@ -1,6 +1,6 @@
-# Product Plan — AnantVidya (proposed name, pending owner approval)
+# Product Plan — GyanGo (proposed name, pending owner approval)
 
-**Document status:** Draft v2 for review
+**Document status:** Draft v3 for review
 **Author:** Prepared with/for the product owner (Business Analyst)
 **Scope of this document:** High-level product definition, monetization, content strategy, phased roadmap, risks, and open decisions. Detailed functional and non-functional requirements live in `docs/REQUIREMENTS.md`.
 
@@ -33,7 +33,7 @@ The defining product mechanic: **a small paid entry quiz gates access to each fr
 1. **Register** with Google sign-in or email + password.
 2. **Verify** email and phone; **upload one identity document**.
 3. **Browse** the course catalog (browsing is open; taking a course is gated).
-4. **Pay** a small fee (INR or USD) for the course's **basic knowledge entry quiz**.
+4. **Pay** a tiered fee (₹249–₹2,499 by course level; INR at launch) for the course's **basic knowledge entry quiz**.
 5. **Take the entry quiz.** The result decides eligibility for the free course.
 6. **Pass →** the course unlocks free of charge; a downloadable certificate is issued for the quiz.
    **Fail →** the learner may re-attempt (re-attempt pricing policy: see Open Questions).
@@ -64,10 +64,11 @@ The defining product mechanic: **a small paid entry quiz gates access to each fr
 - Benefits: zero video hosting/bandwidth cost, plus YouTube advertising revenue once the channel qualifies for monetization.
 - **Honest caveat:** YouTube monetization requires meeting YouTube Partner Program thresholds (historically ~1,000 subscribers and ~4,000 public watch hours, subject to YouTube's current policy) and compliance with YouTube's rules on AI-generated content. Ad revenue should be treated as a *later-stage* income stream, not launch revenue. Video production is also an operational pipeline (scripting, generation, review, upload) that runs alongside the web product.
 
-### 4.3 Accuracy and trust
+### 4.3 Accuracy, trust, and the publication workflow
 - Every AI-generated lesson carries a visible disclaimer: *"This content is AI-generated. Verify independently before professional or medical use."*
-- Errors are mitigated **incrementally** (owner's decision): a "report an error" control on every lesson feeds a review queue; corrected lessons replace cached versions.
 - High-stakes domains (medicine, law, finance) receive a stronger disclaimer.
+- **Error-review workflow (owner's decision):** learner reports an error → **first review** by the platform reviewer (admin/technical review of the report and the proposed correction) → **second review and final approval by the owner** → only then is the corrected content published. **Nothing is released without the owner's permission.**
+- **Consequence flagged for the owner (trade-off, not a decision made for you):** applied literally, "nothing is released without my permission" also covers *brand-new AI-generated courses* requested by learners. That means a learner requesting a new topic does **not** see it instantly; the generated course enters your approval queue and goes live only after you approve it, with the learner notified. This protects quality but makes you the publishing bottleneck and removes the "instant answer" experience. The current documents implement the approval-queue version faithfully. If you prefer instant publication for new lessons with your approval required only for *corrections*, say so and both documents will be amended.
 
 ## 5. Languages
 
@@ -77,13 +78,33 @@ Version 1 supports **English, Hindi, and Bengali** — both the user interface a
 
 | # | Stream | Mechanics | Timing |
 |---|---|---|---|
-| 1 | **Paid entry quizzes** | Per-quiz fee of **₹249–₹2,499** depending on the course (admin-configurable per course), in INR (UPI/cards via an Indian gateway such as Razorpay) or the USD equivalent (cards). **All quiz payments are final — no refunds** (owner's decision). | From launch |
+| 1 | **Paid entry quizzes** | Per-quiz fee of **₹249–₹2,499**, tiered by course level (see Section 6.1). INR via UPI and domestic cards (gateway with individual onboarding, e.g., Razorpay); USD deferred until a registered business entity exists (Section 12, item 9). **All quiz payments are final — no refunds; failed re-attempts cost the same full price** (owner's decisions). | From launch |
 | 2 | **Premium tier** | Monthly subscription: unlimited fresh AI lesson generation (free users get a daily cap), personalized study plans, priority support. Suggested band ₹99–₹199/month (final price: open question) | Shortly after launch |
 | 3 | **YouTube ad revenue** | Ads on the platform's YouTube channel videos | After channel meets YouTube Partner Program thresholds |
 
 Free users can always learn: the daily generation cap applies only to *brand-new, never-before-generated* topics; cached lessons are unlimited. The cap is simultaneously a cost-control mechanism (Section 8).
 
-Payment currency: **INR and USD** both supported. Quiz price band (owner's decision): **₹249–₹2,499 per attempt**, set per course within this band via the admin panel; the USD price is the per-course equivalent (roughly $3–$30, exact figures set per course). Re-attempt pricing after a failed quiz remains an open decision (Section 12, item 2).
+### 6.1 Quiz price tiers (owner's decision: ₹249–₹2,499, positioned by level against the market)
+
+Pricing is tiered by the level/market value of the target exam or subject, informed by market research of Indian online test-series pricing (researched August 2026; sources include Testbook, Adda247, Physics Wallah, ClearIAS, Aakash, Tutorials Dojo/Whizlabs, PMP simulators):
+
+| Tier | Level / Category | Our price per attempt | Market anchor (single test series / practice exams) |
+|---|---|---|---|
+| 1 | School level (classes 6–12, board prep) | **₹249** | ₹149–₹999 (Dreamz, PW school test series) |
+| 2 | Diploma / ITI / vocational | **₹349** | Sparse direct market; positioned just above school tier |
+| 3 | Degree level & general subjects (UG/PG academics, general learning topics) | **₹499** | Aligned with mainstream test-pass products ₹499–₹1,499 |
+| 4 | Government recruitment exams (SSC, banking, railways, state exams) | **₹499** | Testbook ₹499–₹1,499/yr; Adda247 promos ₹49–₹999 |
+| 5 | Entrance exams (NEET, JEE, CUET, state CETs) | **₹749** | Basic online series ₹299–₹999 (PW ₹499, NEET Kaka ₹599); premium ₹2,500–₹6,000 (Aakash ₹5,000) |
+| 6 | Premier competitive exams (UPSC and equivalents) | **₹999** | Budget series ₹2,370–₹4,999 (ClearIAS ₹4,999); premium ₹7,600–₹15,000 (NextIAS, Vision IAS) |
+| 7 | Doctors / medical PG & professional specialization | **₹1,499** | High-value segment; PG-level series typically ₹2,000–₹6,000 |
+| 8 | Professional certifications — AWS, Gen AI | **₹1,499** | Third-party practice exams ₹1,500–₹2,500/exam (Tutorials Dojo, Whizlabs); Udemy ₹500–₹1,500 on sale |
+| 9 | PMP and premium professional certifications | **₹2,499** | Mock simulators ₹4,000–₹12,000 (ProThoughts data); Udemy sets ~₹1,300–₹3,500 |
+
+Positioning logic: our quiz is a single *entry* assessment (not a 40-test series), so each tier is priced at or below the entry point of the corresponding market segment while respecting the owner's ₹249–₹2,499 band. All tier prices are admin-configurable so they can be adjusted with real conversion data.
+
+**Re-attempt policy (owner's decision): a failed quiz re-attempt is charged the same full price.**
+
+Payment currency: INR at launch; USD depends on gateway capability (see Section 12, item 9).
 
 ## 7. Trust, Safety & Compliance
 
@@ -114,7 +135,7 @@ Concrete monthly figures depend on user volume, which is unknown pre-launch; the
 Phases are scoped by capability, not calendar time.
 
 - **Phase 0 — Foundation:** finalize open questions (Section 12), Privacy Policy/ToS drafts, payment gateway onboarding (business KYC), YouTube channel creation, choice of AI provider and tech stack.
-- **Phase 1 — MVP (launch):** registration (Google + email), phone OTP, ID upload, course catalog, paid entry quiz (INR + USD), quiz-pass course unlock, AI text lessons (EN/HI/BN) with caching and disclaimers, downloadable documents and certificates (PDF), embedded YouTube videos, basic admin panel (user/ID review, content review, error-report queue).
+- **Phase 1 — MVP (launch):** registration (Google + email), phone OTP, ID upload, course catalog, paid entry quiz (INR via UPI + domestic cards), quiz-pass course unlock, AI text lessons (EN/HI/BN) with caching and disclaimers, owner approval queue for course publication, downloadable documents and certificates (PDF), embedded YouTube videos, basic admin panel (user/ID review, content review, error-report queue).
 - **Phase 2 — Monetization depth:** premium subscription tier, personalized study plans, certification-prep track expansion, error-mitigation workflow maturity.
 - **Phase 3 — Scale:** YouTube Partner Program qualification and ad revenue, more languages, mobile apps, community features (discussions), institutional/bulk offerings.
 
@@ -143,15 +164,15 @@ Item numbering is stable — the requirements document cross-references these as
 
 | # | Topic | Status | Decision / What's still needed |
 |---|---|---|---|
-| 1 | Product name and domain | **Proposed — awaiting owner approval** | Recommended: **AnantVidya** ("endless knowledge" — *anant* = endless, *vidya* = knowledge; meaningful in Hindi and Bengali, matches the mission of studying endlessly). Alternates: **GyanSetu** ("bridge of knowledge"), **VidyaVerse**. Domain and trademark availability have **not** been verified and must be checked before committing. |
-| 2 | Quiz pricing | **Partially decided** | Price band decided: **₹249–₹2,499 per attempt**, set per course (USD equivalent per course). Still open: whether a failed attempt's re-take is charged full price, discounted, or free once. |
+| 1 | Product name and domain | **New proposals — awaiting owner approval** | Owner asked for something catchy for both children and adults. Recommended: **GyanGo** (*gyan* = knowledge in Hindi and Bengali + "go" for energy; short, playful for kids, credible for adults). Alternates: **Learnzy** (fun, global-sounding) and **CurioLearn** (curiosity-led). Earlier suggestions (AnantVidya, GyanSetu, VidyaVerse) remain fallbacks. Domain and trademark availability have **not** been verified and must be checked before committing. |
+| 2 | Quiz pricing | **Decided** | Tiered by level within ₹249–₹2,499, grounded in August 2026 market research — see Section 6.1 for the nine-tier table (school ₹249 … PMP ₹2,499). **Failed re-attempts are charged the same full price.** All tier prices admin-configurable. |
 | 3 | Certificates | **Decided (one confirmation pending)** | Certificates at **both** points: entry-quiz pass and course completion. Both downloadable PDFs. Pending confirmation: completion certificate is included free (no extra charge) — this document assumes free since the course is free; owner to confirm or correct. |
 | 4 | Quiz integrity | **Open** | v1 has timed quizzes with randomized question subsets (already in requirements). Anything stronger (webcam proctoring, tab-switch detection)? |
 | 5 | ID verification depth | **Decided** | **Manual admin review** for v1 (cost-efficient: zero per-check cost). Automated KYC (₹2–₹25/check) deferred until volume demands it. |
 | 6 | Refund policy | **Decided** | **No refunds.** All quiz payments are final; stated in ToS and on the checkout screen before payment. |
 | 7 | Premium tier price & free-tier daily cap | **Open** | Suggested ₹99–₹199/month; cap value to be set (built as admin-configurable regardless). |
-| 8 | Content-error reviewer | **Open** | Owner initially, or a hired reviewer? |
-| 9 | Business entity for payment gateway KYC | **Open** | Registered entity or individual/proprietor onboarding? Required before Razorpay (or similar) can go live. |
+| 8 | Content-error reviewer | **Decided** | Two-stage review: platform reviewer first, then the **owner gives final approval**; nothing is released without owner permission (see Section 4.3, including the flagged trade-off for new-course publication). |
+| 9 | Business entity for payment gateway KYC | **Decided path (interim)** | Owner has **no registered business entity** — only personal UPI and a bank account. Practical notes: (a) using a *personal* UPI ID for commercial collections violates NPCI/bank norms and risks account flags, so it is not the plan of record; (b) Indian gateways (Razorpay, Cashfree, PayU) offer **individual / sole-proprietor onboarding** with just PAN + bank account, which unlocks UPI *and* domestic cards plus payment webhooks — this is the recommended launch path; (c) **international cards / USD pricing** generally requires fuller business documentation, so **launch is INR-only** and USD is deferred until a registered entity exists. |
 | 10 | Certification-prep launch list | **Decided** | **All Indian central government exams, all state government exams, Generative AI certifications, AWS, PMP** — seeded by demand, long tail generated on learner request (see Section 4.1). |
 
 ---

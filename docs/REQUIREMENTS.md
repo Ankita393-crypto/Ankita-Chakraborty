@@ -1,6 +1,6 @@
-# Requirements Document — AnantVidya (proposed name, pending owner approval)
+# Requirements Document — GyanGo (proposed name, pending owner approval)
 
-**Document status:** Draft v2 for review
+**Document status:** Draft v3 for review
 **Derived from:** `docs/PRODUCT_PLAN.md`
 **Scope:** Functional and non-functional requirements for the **Phase 1 MVP** web application, with Phase 2+ items marked as such. Open decisions are cross-referenced to the product plan's Open Questions (marked **[OQ-n]**) and are not assumed.
 
@@ -39,24 +39,24 @@ Requirement priority uses MoSCoW: **M** = Must have (MVP), **S** = Should have, 
 |---|---|---|
 | FR-9 | Visitors and learners can browse/search the course catalog without payment; course *content* is locked until the entry quiz is passed. | M |
 | FR-10 | Two content track types: **General subjects** (any teachable topic) and **Certification prep** (materials for external certifications; the platform does not award external certifications and the UI must state this). Certification-prep launch scope (decided [OQ-10]): Indian central government exams, state government exams, Generative AI certifications, AWS, and PMP — seeded with the highest-demand exams, long tail added via FR-11 requests. | M |
-| FR-11 | Learners can request a course on a topic not yet in the catalog; the system generates it via AI (subject to FR-12 limits) and adds it to the catalog for everyone. | M |
+| FR-11 | Learners can request a course on a topic not yet in the catalog; the system generates it via AI (subject to FR-12 limits) and places it in the **owner approval queue** (FR-34). It is added to the public catalog only after owner approval; the requesting learner is notified when it goes live. (Decided [OQ-8]: nothing is released without owner permission — trade-off flagged in product plan Section 4.3.) | M |
 | FR-12 | Free-tier learners have a daily cap on *new* (never-before-generated) lesson generation requests; cached/stored lessons are unlimited for eligible learners. Cap value: **[OQ-7]**. | M |
 | FR-13 | AI-generated lessons are stored (cached) per topic **per language** and reused for subsequent learners. | M |
 | FR-14 | Course content is available in **English, Hindi, and Bengali**; the learner's language preference selects both UI language and content language. | M |
 | FR-15 | Lessons, notes, and certification-prep documents are downloadable (PDF). | M |
 | FR-16 | Course pages can embed videos from the platform's YouTube channel. Video availability is optional per course (text lessons alone are sufficient for launch). | M |
 | FR-17 | Every AI-generated lesson displays a disclaimer: *"This content is AI-generated. Verify independently before professional or medical use."* High-stakes categories (medicine, law, finance) display a stronger variant. | M |
-| FR-18 | Every lesson has a "Report an error" control; reports enter an admin review queue; corrected lessons replace the cached version. Reviewer assignment: **[OQ-8]**. | M |
+| FR-18 | Every lesson has a "Report an error" control. Two-stage review (decided [OQ-8]): reports and proposed corrections are reviewed first by the platform reviewer, then **approved by the owner**; only owner-approved corrections replace the cached/published version. | M |
 
 ### 2.3 Entry Quiz & Payments (the core gating mechanic)
 
 | ID | Requirement | Priority |
 |---|---|---|
 | FR-19 | Each course has a **basic knowledge entry quiz**. A learner must pay for and pass this quiz to unlock the (free) course. | M |
-| FR-20 | Quiz payment is accepted in **INR** (UPI, cards, net banking via an Indian gateway, e.g., Razorpay) and **USD** (cards). Price per attempt is **admin-configurable per course within ₹249–₹2,499** (decided [OQ-2]); the USD price is set per course as the equivalent. The checkout screen displays the no-refund policy before payment. | M |
+| FR-20 | Quiz payment is accepted in **INR** — UPI and domestic cards via an Indian gateway supporting individual/sole-proprietor onboarding (e.g., Razorpay), since the owner has no registered business entity yet (decided path [OQ-9]). Personal-UPI collection is not used (NPCI norms). **USD/international cards are deferred** until a registered entity exists. Price per attempt follows the **nine-tier level-based table in product plan Section 6.1** (₹249 school … ₹2,499 PMP), admin-configurable per tier and per course (decided [OQ-2]). The checkout screen displays the no-refund policy before payment. | M |
 | FR-21 | Payment is only available to learners whose ID status is *approved* (FR-6). | M |
 | FR-22 | Quiz questions are AI-generated per course, stored, and drawn as a randomized subset per attempt; quizzes are timed. Deeper anti-cheating (proctoring etc.): **[OQ-4]**. | M |
-| FR-23 | Pass threshold is configurable per course (default: to be set by admin). On pass: course unlocks permanently for that learner and a certificate is issued (FR-26). On fail: result shown with score; re-attempt pricing (full price / discounted / one free retry) remains open **[OQ-2]** and will be built admin-configurable. | M |
+| FR-23 | Pass threshold is configurable per course (default: to be set by admin). On pass: course unlocks permanently for that learner and a certificate is issued (FR-26). On fail: result shown with score; **a re-attempt is charged the same full price as the first attempt** (decided [OQ-2]). | M |
 | FR-24 | All payments produce a receipt (email + downloadable); learners can view payment history. | M |
 | FR-25 | Payment webhooks reconcile gateway status; a paid-but-not-started quiz attempt remains available to the learner. **No refunds** (decided [OQ-6]): all quiz payments are final; the system offers no refund flow, and the policy appears in the ToS and at checkout. | M |
 
@@ -82,6 +82,7 @@ Requirement priority uses MoSCoW: **M** = Must have (MVP), **S** = Should have, 
 | FR-31 | Admin panel with role-restricted access: ID review queue (FR-6), content error-report queue (FR-18), course/catalog management, quiz pass-threshold configuration, user lookup (view status, resend OTP, revoke access). | M |
 | FR-32 | Admin dashboard for cost/usage observability: AI generation spend, cache hit rate, quiz purchases, signup funnel drop-off. | M |
 | FR-33 | Manual course curation: admins can edit or unpublish any AI-generated lesson. | M |
+| FR-34 | **Owner approval queue:** all publishable content changes — new AI-generated courses (FR-11) and error corrections (FR-18) — require explicit approval by the owner role before going live. The queue shows pending items with previews, and approval/rejection actions are audit-logged (NFR-8). | M |
 
 ## 3. Non-Functional Requirements
 
@@ -114,7 +115,7 @@ Requirement priority uses MoSCoW: **M** = Must have (MVP), **S** = Should have, 
 |---|---|---|
 | AI provider account (text generation) | FR-11–FR-14, FR-22 | Provider choice pending (Phase 0) |
 | AI video tooling + YouTube channel | FR-16 | Channel must exist before any video embedding; monetization much later |
-| Payment gateway onboarding (e.g., Razorpay) | FR-20 | Requires business KYC **[OQ-9]** |
+| Payment gateway onboarding (e.g., Razorpay) | FR-20 | Individual/sole-proprietor onboarding with owner's PAN + bank account (no registered entity yet — decided path [OQ-9]); USD deferred |
 | SMS OTP provider | FR-4 | Per-SMS cost in India |
 | Domain + hosting | Everything | Proposed name **AnantVidya** pending owner approval and domain/trademark check **[OQ-1]** |
 | Privacy Policy / ToS drafts | NFR-3 | Launch blocker |
@@ -123,4 +124,4 @@ Requirement priority uses MoSCoW: **M** = Must have (MVP), **S** = Should have, 
 
 All **[OQ-n]** references point to Section 12 (Decisions Log & Open Questions) of `docs/PRODUCT_PLAN.md`, which records each item's status — decided or still open. No requirement with an open item will be implemented on an assumed answer; where a placeholder is unavoidable (e.g., re-attempt pricing), it is built as **admin-configurable** so the decision can be applied without code changes.
 
-**Still open after the latest owner review:** re-attempt pricing on quiz failure [OQ-2], stronger quiz anti-cheating [OQ-4], premium price and free-tier cap [OQ-7], content-error reviewer [OQ-8], business entity for payment-gateway KYC [OQ-9], and final approval of the proposed name [OQ-1].
+**Still open after the latest owner review:** stronger quiz anti-cheating [OQ-4], premium price and free-tier cap [OQ-7], approval of a proposed name [OQ-1], owner confirmation that the completion certificate is free [OQ-3], and owner confirmation of the new-course approval-queue trade-off flagged in product plan Section 4.3 [OQ-8].
