@@ -1,6 +1,6 @@
-# Requirements Document — "Learn Anything" Platform (working title)
+# Requirements Document — AnantVidya (proposed name, pending owner approval)
 
-**Document status:** Draft v1 for review
+**Document status:** Draft v2 for review
 **Derived from:** `docs/PRODUCT_PLAN.md`
 **Scope:** Functional and non-functional requirements for the **Phase 1 MVP** web application, with Phase 2+ items marked as such. Open decisions are cross-referenced to the product plan's Open Questions (marked **[OQ-n]**) and are not assumed.
 
@@ -29,7 +29,7 @@ Requirement priority uses MoSCoW: **M** = Must have (MVP), **S** = Should have, 
 | FR-3 | Email verification is required before the account is active (email-registration path; Google accounts are treated as email-verified). | M |
 | FR-4 | Phone number is **mandatory for all users**, including Google sign-ins, and is verified via SMS OTP at signup. | M |
 | FR-5 | Users must upload **one identity document** (PAN, Aadhaar, driving license, student ID, or employee ID) before they can purchase a quiz. Accepted formats: JPG/PNG/PDF; max file size enforced. | M |
-| FR-6 | Uploaded IDs enter an admin review queue; account ID-status is one of *pending / approved / rejected (with reason, re-upload allowed)*. Verification depth beyond manual review: **[OQ-5]**. | M |
+| FR-6 | Uploaded IDs enter an admin review queue for **manual review** (decided [OQ-5]: manual for v1 on cost-efficiency grounds; automated KYC deferred). Account ID-status is one of *pending / approved / rejected (with reason, re-upload allowed)*. | M |
 | FR-7 | Password reset via email; session management with secure logout. | M |
 | FR-8 | Users can view/edit profile (name as it should appear on certificates, language preference) and delete their account (triggers data-deletion workflow, NFR-9). | M |
 
@@ -38,7 +38,7 @@ Requirement priority uses MoSCoW: **M** = Must have (MVP), **S** = Should have, 
 | ID | Requirement | Priority |
 |---|---|---|
 | FR-9 | Visitors and learners can browse/search the course catalog without payment; course *content* is locked until the entry quiz is passed. | M |
-| FR-10 | Two content track types: **General subjects** (any teachable topic) and **Certification prep** (materials for external certifications; the platform does not award external certifications and the UI must state this). | M |
+| FR-10 | Two content track types: **General subjects** (any teachable topic) and **Certification prep** (materials for external certifications; the platform does not award external certifications and the UI must state this). Certification-prep launch scope (decided [OQ-10]): Indian central government exams, state government exams, Generative AI certifications, AWS, and PMP — seeded with the highest-demand exams, long tail added via FR-11 requests. | M |
 | FR-11 | Learners can request a course on a topic not yet in the catalog; the system generates it via AI (subject to FR-12 limits) and adds it to the catalog for everyone. | M |
 | FR-12 | Free-tier learners have a daily cap on *new* (never-before-generated) lesson generation requests; cached/stored lessons are unlimited for eligible learners. Cap value: **[OQ-7]**. | M |
 | FR-13 | AI-generated lessons are stored (cached) per topic **per language** and reused for subsequent learners. | M |
@@ -53,12 +53,12 @@ Requirement priority uses MoSCoW: **M** = Must have (MVP), **S** = Should have, 
 | ID | Requirement | Priority |
 |---|---|---|
 | FR-19 | Each course has a **basic knowledge entry quiz**. A learner must pay for and pass this quiz to unlock the (free) course. | M |
-| FR-20 | Quiz payment is accepted in **INR** (UPI, cards, net banking via an Indian gateway, e.g., Razorpay) and **USD** (cards). Price per attempt: **[OQ-2]**. | M |
+| FR-20 | Quiz payment is accepted in **INR** (UPI, cards, net banking via an Indian gateway, e.g., Razorpay) and **USD** (cards). Price per attempt is **admin-configurable per course within ₹249–₹2,499** (decided [OQ-2]); the USD price is set per course as the equivalent. The checkout screen displays the no-refund policy before payment. | M |
 | FR-21 | Payment is only available to learners whose ID status is *approved* (FR-6). | M |
 | FR-22 | Quiz questions are AI-generated per course, stored, and drawn as a randomized subset per attempt; quizzes are timed. Deeper anti-cheating (proctoring etc.): **[OQ-4]**. | M |
-| FR-23 | Pass threshold is configurable per course (default: to be set by admin). On pass: course unlocks permanently for that learner and a certificate is issued (FR-26). On fail: result shown with score; re-attempt requires the re-attempt policy **[OQ-2]**. | M |
+| FR-23 | Pass threshold is configurable per course (default: to be set by admin). On pass: course unlocks permanently for that learner and a certificate is issued (FR-26). On fail: result shown with score; re-attempt pricing (full price / discounted / one free retry) remains open **[OQ-2]** and will be built admin-configurable. | M |
 | FR-24 | All payments produce a receipt (email + downloadable); learners can view payment history. | M |
-| FR-25 | Payment webhooks reconcile gateway status; a paid-but-not-started quiz attempt remains available to the learner. Refund handling per policy **[OQ-6]**. | M |
+| FR-25 | Payment webhooks reconcile gateway status; a paid-but-not-started quiz attempt remains available to the learner. **No refunds** (decided [OQ-6]): all quiz payments are final; the system offers no refund flow, and the policy appears in the ToS and at checkout. | M |
 
 ### 2.4 Certificates
 
@@ -66,7 +66,7 @@ Requirement priority uses MoSCoW: **M** = Must have (MVP), **S** = Should have, 
 |---|---|---|
 | FR-26 | Passing an entry quiz issues a **downloadable PDF certificate** bearing the learner's profile name, course name, date, and a unique verification ID. | M |
 | FR-27 | A public verification page confirms a certificate's authenticity by verification ID (shows name, course, date — no other personal data). | M |
-| FR-28 | Course-*completion* certificate (in addition to the entry-quiz certificate): **decision pending [OQ-3]** — not built until decided. | W (pending) |
+| FR-28 | **Course-completion certificate** (decided [OQ-3]): the system tracks lesson-level progress, and when a learner completes all lessons of an unlocked course, a second downloadable PDF certificate is issued with its own verification ID (same format as FR-26/FR-27). Included at no extra charge (owner to confirm the free-of-charge assumption). | M |
 
 ### 2.5 Premium Tier (Phase 2)
 
@@ -103,7 +103,7 @@ Requirement priority uses MoSCoW: **M** = Must have (MVP), **S** = Should have, 
 - Native mobile apps (web-first; responsive web serves mobile users).
 - User-generated courses or instructor marketplace.
 - Community features (forums, discussions, messaging).
-- Automated third-party KYC verification (unless **[OQ-5]** decides otherwise).
+- Automated third-party KYC verification (decided [OQ-5]: manual admin review in v1; automated KYC revisited at scale).
 - Webcam proctoring of quizzes (unless **[OQ-4]** decides otherwise).
 - Languages beyond English, Hindi, Bengali.
 - Issuing or proxying external certifications — the platform provides *preparation* only.
@@ -116,9 +116,11 @@ Requirement priority uses MoSCoW: **M** = Must have (MVP), **S** = Should have, 
 | AI video tooling + YouTube channel | FR-16 | Channel must exist before any video embedding; monetization much later |
 | Payment gateway onboarding (e.g., Razorpay) | FR-20 | Requires business KYC **[OQ-9]** |
 | SMS OTP provider | FR-4 | Per-SMS cost in India |
-| Domain + hosting | Everything | Name pending **[OQ-1]** |
+| Domain + hosting | Everything | Proposed name **AnantVidya** pending owner approval and domain/trademark check **[OQ-1]** |
 | Privacy Policy / ToS drafts | NFR-3 | Launch blocker |
 
 ## 6. Traceability of Open Decisions
 
-All **[OQ-n]** references point to Section 12 of `docs/PRODUCT_PLAN.md`. No requirement marked with an open question will be implemented on an assumed answer; where a placeholder is unavoidable (e.g., quiz price), it will be built as **admin-configurable** so the decision can be applied without code changes.
+All **[OQ-n]** references point to Section 12 (Decisions Log & Open Questions) of `docs/PRODUCT_PLAN.md`, which records each item's status — decided or still open. No requirement with an open item will be implemented on an assumed answer; where a placeholder is unavoidable (e.g., re-attempt pricing), it is built as **admin-configurable** so the decision can be applied without code changes.
+
+**Still open after the latest owner review:** re-attempt pricing on quiz failure [OQ-2], stronger quiz anti-cheating [OQ-4], premium price and free-tier cap [OQ-7], content-error reviewer [OQ-8], business entity for payment-gateway KYC [OQ-9], and final approval of the proposed name [OQ-1].
