@@ -1,6 +1,6 @@
-# Product Plan — GyanGo (proposed name, pending owner approval)
+# Product Plan — Learnzy
 
-**Document status:** Draft v3 for review
+**Document status:** Draft v4 for review
 **Author:** Prepared with/for the product owner (Business Analyst)
 **Scope of this document:** High-level product definition, monetization, content strategy, phased roadmap, risks, and open decisions. Detailed functional and non-functional requirements live in `docs/REQUIREMENTS.md`.
 
@@ -41,7 +41,7 @@ The defining product mechanic: **a small paid entry quiz gates access to each fr
 8. Certification-prep tracks additionally provide downloadable **prep documents** for the external exam.
 9. **Complete the course →** a second downloadable certificate, the **course-completion certificate**, is issued when the learner finishes all lessons.
 
-**Certificates are issued at both points** (owner's decision): one for passing the paid entry quiz, one for completing the course. All certificates are **downloadable** (PDF). The completion certificate is included at no extra charge, since the course itself is free (owner to confirm — flagged in Section 12, item 3).
+**Certificates are issued at both points** (owner's decision): the **quiz certificate** is covered by the quiz fee (no separate charge beyond the paid attempt), and the **course-completion certificate** — the website's own certificate of completion — is **free**. All certificates are downloadable (PDF).
 
 ## 4. Content Strategy
 
@@ -67,8 +67,10 @@ The defining product mechanic: **a small paid entry quiz gates access to each fr
 ### 4.3 Accuracy, trust, and the publication workflow
 - Every AI-generated lesson carries a visible disclaimer: *"This content is AI-generated. Verify independently before professional or medical use."*
 - High-stakes domains (medicine, law, finance) receive a stronger disclaimer.
-- **Error-review workflow (owner's decision):** learner reports an error → **first review** by the platform reviewer (admin/technical review of the report and the proposed correction) → **second review and final approval by the owner** → only then is the corrected content published. **Nothing is released without the owner's permission.**
-- **Consequence flagged for the owner (trade-off, not a decision made for you):** applied literally, "nothing is released without my permission" also covers *brand-new AI-generated courses* requested by learners. That means a learner requesting a new topic does **not** see it instantly; the generated course enters your approval queue and goes live only after you approve it, with the learner notified. This protects quality but makes you the publishing bottleneck and removes the "instant answer" experience. The current documents implement the approval-queue version faithfully. If you prefer instant publication for new lessons with your approval required only for *corrections*, say so and both documents will be amended.
+- **Publication & review workflow (owner delegated this decision; the following is the platform's decided policy):**
+  - **New AI-generated courses publish instantly.** When a learner requests a topic, the lesson is generated, carries its disclaimer, and is live immediately — preserving the product's core "ask and learn" experience. The owner is never a blocking approver for new content.
+  - **Error corrections are reviewed before replacing published content:** learner report → platform reviewer verifies the error and the proposed fix → corrected version replaces the cached one. Verified corrections do not wait on the owner.
+  - **Owner oversight without bottleneck:** every publication and correction is audit-logged; the owner receives a digest of new/changed content and can edit or **unpublish any content at any time** with immediate effect.
 
 ## 5. Languages
 
@@ -135,7 +137,7 @@ Concrete monthly figures depend on user volume, which is unknown pre-launch; the
 Phases are scoped by capability, not calendar time.
 
 - **Phase 0 — Foundation:** finalize open questions (Section 12), Privacy Policy/ToS drafts, payment gateway onboarding (business KYC), YouTube channel creation, choice of AI provider and tech stack.
-- **Phase 1 — MVP (launch):** registration (Google + email), phone OTP, ID upload, course catalog, paid entry quiz (INR via UPI + domestic cards), quiz-pass course unlock, AI text lessons (EN/HI/BN) with caching and disclaimers, owner approval queue for course publication, downloadable documents and certificates (PDF), embedded YouTube videos, basic admin panel (user/ID review, content review, error-report queue).
+- **Phase 1 — MVP (launch):** registration (Google + email), phone OTP, ID upload, course catalog, paid entry quiz (INR via UPI + domestic cards), quiz-pass course unlock, AI text lessons (EN/HI/BN) with caching, disclaimers, and instant publication, downloadable documents and certificates (PDF), embedded YouTube videos, basic admin panel (user/ID review, error-report review queue, content audit log with unpublish).
 - **Phase 2 — Monetization depth:** premium subscription tier, personalized study plans, certification-prep track expansion, error-mitigation workflow maturity.
 - **Phase 3 — Scale:** YouTube Partner Program qualification and ad revenue, more languages, mobile apps, community features (discussions), institutional/bulk offerings.
 
@@ -164,14 +166,14 @@ Item numbering is stable — the requirements document cross-references these as
 
 | # | Topic | Status | Decision / What's still needed |
 |---|---|---|---|
-| 1 | Product name and domain | **New proposals — awaiting owner approval** | Owner asked for something catchy for both children and adults. Recommended: **GyanGo** (*gyan* = knowledge in Hindi and Bengali + "go" for energy; short, playful for kids, credible for adults). Alternates: **Learnzy** (fun, global-sounding) and **CurioLearn** (curiosity-led). Earlier suggestions (AnantVidya, GyanSetu, VidyaVerse) remain fallbacks. Domain and trademark availability have **not** been verified and must be checked before committing. |
+| 1 | Product name and domain | **Decided** | **Learnzy** (owner's pick — catchy for both children and adults). Domain and trademark availability still must be verified before public launch; if unavailable, fallbacks are GyanGo and CurioLearn. |
 | 2 | Quiz pricing | **Decided** | Tiered by level within ₹249–₹2,499, grounded in August 2026 market research — see Section 6.1 for the nine-tier table (school ₹249 … PMP ₹2,499). **Failed re-attempts are charged the same full price.** All tier prices admin-configurable. |
-| 3 | Certificates | **Decided (one confirmation pending)** | Certificates at **both** points: entry-quiz pass and course completion. Both downloadable PDFs. Pending confirmation: completion certificate is included free (no extra charge) — this document assumes free since the course is free; owner to confirm or correct. |
-| 4 | Quiz integrity | **Open** | v1 has timed quizzes with randomized question subsets (already in requirements). Anything stronger (webcam proctoring, tab-switch detection)? |
+| 3 | Certificates | **Decided** | Certificates at **both** points, both downloadable PDFs. The quiz certificate is covered by the paid quiz fee; the course-completion certificate (the website's own certificate) is **free**. |
+| 4 | Quiz integrity | **Decided** | **Time-bound, not proctored.** Timed quizzes with randomized question subsets; no webcam proctoring or invasive monitoring. |
 | 5 | ID verification depth | **Decided** | **Manual admin review** for v1 (cost-efficient: zero per-check cost). Automated KYC (₹2–₹25/check) deferred until volume demands it. |
 | 6 | Refund policy | **Decided** | **No refunds.** All quiz payments are final; stated in ToS and on the checkout screen before payment. |
-| 7 | Premium tier price & free-tier daily cap | **Open** | Suggested ₹99–₹199/month; cap value to be set (built as admin-configurable regardless). |
-| 8 | Content-error reviewer | **Decided** | Two-stage review: platform reviewer first, then the **owner gives final approval**; nothing is released without owner permission (see Section 4.3, including the flagged trade-off for new-course publication). |
+| 7 | Premium tier price & free-tier daily cap | **Deferred (owner's decision)** | To be decided later, closer to Phase 2. Built admin-configurable so the price and cap can be set without code changes. Suggested band remains ₹99–₹199/month. |
+| 8 | Content review & publication | **Decided (delegated to the platform)** | Owner delegated this decision. Policy: new AI courses publish **instantly**; error corrections require platform-reviewer verification before replacing published content; owner has full oversight via audit log, change digest, and instant unpublish power (Section 4.3). |
 | 9 | Business entity for payment gateway KYC | **Decided path (interim)** | Owner has **no registered business entity** — only personal UPI and a bank account. Practical notes: (a) using a *personal* UPI ID for commercial collections violates NPCI/bank norms and risks account flags, so it is not the plan of record; (b) Indian gateways (Razorpay, Cashfree, PayU) offer **individual / sole-proprietor onboarding** with just PAN + bank account, which unlocks UPI *and* domestic cards plus payment webhooks — this is the recommended launch path; (c) **international cards / USD pricing** generally requires fuller business documentation, so **launch is INR-only** and USD is deferred until a registered entity exists. |
 | 10 | Certification-prep launch list | **Decided** | **All Indian central government exams, all state government exams, Generative AI certifications, AWS, PMP** — seeded by demand, long tail generated on learner request (see Section 4.1). |
 
