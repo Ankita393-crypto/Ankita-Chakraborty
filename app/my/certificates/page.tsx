@@ -22,7 +22,7 @@ export default async function MyCertificatesPage() {
       <h1 className="text-2xl font-extrabold">My certificates</h1>
       {certs.length === 0 ? (
         <p className="mt-4 text-slate-600">
-          No certificates yet. Pass an entry quiz to earn your first one —{" "}
+          No certificates yet. Pass an entrance exam to earn your first one —{" "}
           <Link href="/courses" className="text-indigo-600 underline">
             browse courses
           </Link>
@@ -39,7 +39,7 @@ export default async function MyCertificatesPage() {
                 <div>
                   <div className="font-semibold">{c.course_title}</div>
                   <div className="text-sm text-slate-500">
-                    {c.kind === "quiz" ? "Entry quiz certificate" : "Completion certificate"} ·{" "}
+                    {c.kind === "quiz" ? "Entrance exam certificate" : "Completion certificate"} ·{" "}
                     {c.issued_at.slice(0, 10)}
                   </div>
                 </div>

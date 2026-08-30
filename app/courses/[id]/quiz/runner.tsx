@@ -66,7 +66,7 @@ export function QuizRunner({
               You passed — {result.score}/{result.total}
             </h1>
             <p className="mt-2 text-sm text-slate-600">
-              The course is now unlocked for you, free. Your quiz certificate is ready in “My certificates”.
+              The course is now unlocked for you, free. Your entrance exam certificate is ready in “My certificates”.
             </p>
           </>
         ) : (
@@ -95,7 +95,7 @@ export function QuizRunner({
   return (
     <div className="max-w-2xl mx-auto">
       <div className="sticky top-16 z-10 rounded-xl bg-white border border-slate-200 px-5 py-3 flex items-center justify-between shadow-sm">
-        <h1 className="font-bold truncate pr-4">Entry quiz: {courseTitle}</h1>
+        <h1 className="font-bold truncate pr-4">Entrance exam: {courseTitle}</h1>
         <span
           className={`font-mono font-bold text-lg tabular-nums ${remaining < 60 ? "text-rose-600" : "text-slate-700"}`}
         >
@@ -103,7 +103,7 @@ export function QuizRunner({
         </span>
       </div>
       <p className="mt-2 text-xs text-slate-500">
-        Time-bound, not proctored. The quiz auto-submits when the timer reaches zero.
+        Time-bound, not proctored. The exam auto-submits when the timer reaches zero.
       </p>
 
       <ol className="mt-5 space-y-5">

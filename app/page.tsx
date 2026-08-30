@@ -43,16 +43,16 @@ export default async function Home() {
             </div>
             <h3 className="mt-1 font-bold text-lg">{c.title}</h3>
             <p className="mt-1 text-sm text-slate-600 line-clamp-2">{c.description}</p>
-            <div className="mt-3 text-sm font-semibold text-slate-700">Entry quiz ₹{c.price_inr} · Course free</div>
+            <div className="mt-3 text-sm font-semibold text-slate-700">Entrance exam ₹{c.price_inr} · Course free</div>
           </Link>
         ))}
       </section>
 
       <section className="mt-16 grid sm:grid-cols-3 gap-4 text-center">
         {[
-          ["1", "Pass a small entry quiz", "A short timed quiz (paid) proves you're serious about the topic."],
-          ["2", "Learn free, endlessly", "The full course unlocks free — AI lessons, videos, and downloadable notes."],
-          ["3", "Earn certificates", "A certificate for the quiz, and a free one when you complete the course."],
+          ["1", "Pass the entrance exam", "A timed exam of proper basic questions — like a scholarship admission test — proves you're serious about the subject."],
+          ["2", "Learn free, endlessly", "The full course unlocks free — chapter-by-chapter lessons, videos, and downloadable notes."],
+          ["3", "Earn certificates", "A certificate for the entrance exam, and a free one when you complete the course."],
         ].map(([n, title, sub]) => (
           <div key={n} className="rounded-2xl bg-white border border-slate-200 p-6">
             <div className="mx-auto w-8 h-8 rounded-full bg-indigo-600 text-white font-bold flex items-center justify-center">

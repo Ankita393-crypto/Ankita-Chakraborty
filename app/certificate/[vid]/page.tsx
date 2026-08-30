@@ -25,19 +25,24 @@ export default async function CertificatePage({ params }: { params: Promise<{ vi
 
   return (
     <div>
-      <div className="print:hidden text-center mb-4">
+      <div className="print:hidden text-center mb-4 flex items-center justify-center gap-3">
+        <a
+          href={`/certificate/${cert.verification_id}/pdf`}
+          className="rounded-xl bg-indigo-600 text-white px-5 py-2.5 font-semibold hover:bg-indigo-700"
+        >
+          Download PDF certificate
+        </a>
         <PrintButton />
-        <p className="mt-1 text-xs text-slate-500">“Save as PDF” in the print dialog downloads the certificate.</p>
       </div>
       <div className="mx-auto max-w-3xl bg-white border-8 border-double border-indigo-700 p-12 text-center print:border-4">
         <div className="text-3xl font-extrabold tracking-tight text-indigo-700">Learnzy</div>
         <div className="mt-1 text-xs uppercase tracking-widest text-slate-500">
-          {cert.kind === "quiz" ? "Certificate of Entry Quiz Achievement" : "Certificate of Course Completion"}
+          {cert.kind === "quiz" ? "Certificate of Entrance Exam Achievement" : "Certificate of Course Completion"}
         </div>
         <p className="mt-10 text-slate-600">This certifies that</p>
         <div className="mt-2 text-4xl font-bold font-serif">{cert.name_on_cert}</div>
         <p className="mt-6 text-slate-600">
-          has {cert.kind === "quiz" ? "successfully passed the entry quiz for" : "successfully completed the course"}
+          has {cert.kind === "quiz" ? "successfully passed the entrance exam for" : "successfully completed the course"}
         </p>
         <div className="mt-2 text-2xl font-semibold">{cert.course_title}</div>
         <p className="mt-8 text-sm text-slate-500">Issued on {date}</p>

@@ -42,7 +42,7 @@ export default async function AdminPage() {
         <h1 className="text-2xl font-extrabold">Admin</h1>
         <div className="mt-3 grid grid-cols-3 gap-3 max-w-lg">
           <Stat label="Users" value={String(stats.users)} />
-          <Stat label="Quiz payments (test)" value={`${stats.payments.c} · ₹${stats.payments.s}`} />
+          <Stat label="Exam payments (test)" value={`${stats.payments.c} · ₹${stats.payments.s}`} />
           <Stat label="Certificates" value={String(stats.certs)} />
         </div>
       </div>

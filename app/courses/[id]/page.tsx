@@ -64,11 +64,11 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
 
       {!isUnlocked ? (
         <div className="mt-8 rounded-2xl bg-white border border-slate-200 p-6">
-          <h2 className="font-bold text-lg">Unlock this course</h2>
+          <h2 className="font-bold text-lg">Unlock this course — entrance exam</h2>
           <p className="mt-1 text-sm text-slate-600">
-            Pass a short entry quiz ({d.quizRequired.toLowerCase()}) to unlock all lessons free. The quiz is timed (5
-            minutes, 5 questions, 60% to pass) and not proctored. Payments are final — no refunds. A failed attempt
-            can be retried at the same price.
+            Like a scholarship admission test: pass the entrance exam to unlock all chapters free. The exam has 15
+            basic-knowledge questions in 20 minutes (60% to pass), drawn from a larger question bank, time-bound but
+            not proctored. Payments are final — no refunds. A failed attempt can be retried at the same price.
           </p>
           {!user ? (
             <Link
@@ -136,7 +136,7 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
             {certs.map((c) => (
               <li key={c.verification_id}>
                 <Link href={`/certificate/${c.verification_id}`} className="text-sm text-emerald-700 underline">
-                  {c.kind === "quiz" ? "Entry quiz certificate" : "Course completion certificate"} (
+                  {c.kind === "quiz" ? "Entrance exam certificate" : "Course completion certificate"} (
                   {c.verification_id})
                 </Link>
               </li>

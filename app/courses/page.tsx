@@ -54,7 +54,7 @@ export default async function CoursesPage() {
                 </div>
                 <h3 className="mt-1 font-bold text-lg">{c.title}</h3>
                 <p className="mt-1 text-sm text-slate-600 line-clamp-2">{c.description}</p>
-                <div className="mt-3 text-sm font-semibold text-slate-700">Entry quiz ₹{c.price_inr} · Course free</div>
+                <div className="mt-3 text-sm font-semibold text-slate-700">Entrance exam ₹{c.price_inr} · Course free</div>
               </Link>
             ))}
           </div>

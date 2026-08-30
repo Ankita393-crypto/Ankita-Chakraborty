@@ -11,7 +11,7 @@ export default function RegisterPage() {
     <div className="max-w-md mx-auto rounded-2xl bg-white border border-slate-200 p-8">
       <h1 className="text-2xl font-extrabold">Create your Learnzy account</h1>
       <p className="mt-1 text-sm text-slate-600">
-        Email, phone, and an ID document are required before you can take a paid quiz.
+        Email, phone, and an ID document are required before you can sit a paid entrance exam.
       </p>
       <div className="mt-3 rounded-lg bg-slate-100 text-slate-600 text-xs p-3">
         Google sign-in will appear here once the owner adds Google OAuth credentials — for the pilot, use email

@@ -8,7 +8,7 @@ import { setLanguage, logout } from "@/app/actions";
 export const metadata: Metadata = {
   title: "Learnzy — Learn anything, prove it, for free",
   description:
-    "AI-powered lessons on every subject. Pass a small entry quiz to unlock any course free and earn downloadable certificates.",
+    "AI-powered lessons on every subject. Pass an entrance exam to unlock any course free and earn downloadable certificates.",
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

@@ -26,9 +26,17 @@ The guiding principle: **learning content is free; the platform earns from the m
 
 Eligibility to register: a valid **email address**, a **mandatory phone number**, and a **mandatory identity document upload** (any one of: PAN, Aadhaar, driving license, student ID, or employee ID). Rationale (owner's decision): ensures accountability and that certificates map to real, identifiable people.
 
+### 2.1 Launch target audience (recommendation based on the current Indian market, awaiting owner confirmation)
+
+- **Primary: government-exam aspirants, roughly ages 18–30** (SSC, banking, railways, state exams). This is India's largest, most persistent paid-learning segment; buyers are accustomed to paying small amounts (₹250–₹1,500) for test prep; and Hindi/Bengali-medium aspirants are underserved by premium English-first platforms — which makes Learnzy's tri-language content a genuine differentiator rather than a nice-to-have.
+- **Secondary: college students and early-career professionals upskilling in Gen AI and AWS.** Fast-growing demand, willingness to pay for certification prep, and low content-production cost for us.
+- **Deliberately not targeted at launch:** K-12 school students as a *marketing* segment (school courses stay in the catalog, but selling to minors requires parental payment decisions and heavy competition against entrenched brands) and NEET/JEE coaching (dominated by large incumbents with massive brand trust; revisit once Learnzy has credibility). The general "learn anything" catalog remains open to everyone — targeting governs where marketing money and seed content go first, not who may sign up.
+
 ## 3. Core Learner Journey (Owner-confirmed "Option B" flow)
 
-The defining product mechanic: **a small paid entry quiz gates access to each free course.** It filters for serious learners and is a primary revenue stream.
+The defining product mechanic: **a paid entrance exam gates access to each free course** — like the admission test of a scholarship school or college. It filters for serious learners and is a primary revenue stream.
+
+**Exam format (owner's direction, implemented):** this is an *exam*, not a casual quiz — 15 proper basic-knowledge questions per attempt, drawn randomly from a per-course bank of 20+, in 20 minutes, 60% to pass, time-bound but not proctored. The questions are pitched so that a student with basic knowledge of and genuine interest in the subject can pass.
 
 1. **Register** with Google sign-in or email + password.
 2. **Verify** email and phone; **upload one identity document**.
@@ -65,6 +73,7 @@ The defining product mechanic: **a small paid entry quiz gates access to each fr
 - **Honest caveat:** YouTube monetization requires meeting YouTube Partner Program thresholds (historically ~1,000 subscribers and ~4,000 public watch hours, subject to YouTube's current policy) and compliance with YouTube's rules on AI-generated content. Ad revenue should be treated as a *later-stage* income stream, not launch revenue. Video production is also an operational pipeline (scripting, generation, review, upload) that runs alongside the web product.
 
 ### 4.3 Accuracy, trust, and the publication workflow
+- **No-false-information policy (owner's direction):** courses must contain only true, verifiable information at proper market depth — real chapters, not thin summaries. When a fact cannot be verified, it is omitted or escalated to the owner for a decision; it is never invented. The pilot's four demo courses are hand-curated to this standard (NCERT-aligned maths, standard oceanography, the official AWS CLF-C02 exam guide, standard SSC reference facts).
 - Every AI-generated lesson carries a visible disclaimer: *"This content is AI-generated. Verify independently before professional or medical use."*
 - High-stakes domains (medicine, law, finance) receive a stronger disclaimer.
 - **Publication & review workflow (owner delegated this decision; the following is the platform's decided policy):**
@@ -176,6 +185,10 @@ Item numbering is stable — the requirements document cross-references these as
 | 8 | Content review & publication | **Decided (delegated to the platform)** | Owner delegated this decision. Policy: new AI courses publish **instantly**; error corrections require platform-reviewer verification before replacing published content; owner has full oversight via audit log, change digest, and instant unpublish power (Section 4.3). |
 | 9 | Business entity for payment gateway KYC | **Decided path (interim)** | Owner has **no registered business entity** — only personal UPI and a bank account. Practical notes: (a) using a *personal* UPI ID for commercial collections violates NPCI/bank norms and risks account flags, so it is not the plan of record; (b) Indian gateways (Razorpay, Cashfree, PayU) offer **individual / sole-proprietor onboarding** with just PAN + bank account, which unlocks UPI *and* domestic cards plus payment webhooks — this is the recommended launch path; (c) **international cards / USD pricing** generally requires fuller business documentation, so **launch is INR-only** and USD is deferred until a registered entity exists. |
 | 10 | Certification-prep launch list | **Decided** | **All Indian central government exams, all state government exams, Generative AI certifications, AWS, PMP** — seeded by demand, long tail generated on learner request (see Section 4.1). |
+| 11 | Exam format | **Decided** | Entrance-exam framing (not "quiz"): 15 basic-knowledge questions from a 20+ bank, 20 minutes, 60% pass, retry at full price, time-bound without proctoring. |
+| 12 | Content depth & truthfulness | **Decided** | Market-level chapters only; no false or assumed information — unverifiable facts are omitted or escalated to the owner (Section 4.3). |
+| 13 | Certificate delivery | **Decided** | Certificates download as generated **PDF files** directly; ID verification always precedes payment, so every certificate holder is document-verified by construction. |
+| 14 | Launch target audience | **Recommended — awaiting owner confirmation** | Primary: government-exam aspirants 18–30 (Hindi/Bengali-medium underserved); secondary: Gen AI / AWS upskillers (Section 2.1). |
 
 ---
 

@@ -11,10 +11,7 @@ import { getDb, audit } from "@/lib/db";
 import { createSession, destroySession, getSessionUser } from "@/lib/auth";
 import { aiAvailable, generateCourse } from "@/lib/ai";
 
-const FREE_DAILY_GENERATIONS = 3;
-const QUIZ_MINUTES = 5;
-const QUIZ_QUESTIONS_PER_ATTEMPT = 5;
-const PASS_PERCENT = 60;
+import { FREE_DAILY_GENERATIONS, EXAM_MINUTES, EXAM_QUESTIONS_PER_ATTEMPT, EXAM_PASS_PERCENT } from "@/lib/config";
 
 // Certificate IDs use an alphabet without look-alike characters (no 0/O, 1/I/L, 5/S, 8/B)
 // so people can read them off a printed certificate without mistakes.
@@ -184,13 +181,13 @@ export async function startAttempt(courseId: number): Promise<{ attemptId?: numb
     .prepare("SELECT id FROM quiz_questions WHERE course_id = ?")
     .all(courseId) as { id: number }[];
   const shuffled = questions.map((q) => q.id).sort(() => Math.random() - 0.5);
-  const chosen = shuffled.slice(0, Math.min(QUIZ_QUESTIONS_PER_ATTEMPT, shuffled.length));
+  const chosen = shuffled.slice(0, Math.min(EXAM_QUESTIONS_PER_ATTEMPT, shuffled.length));
 
   db.prepare("UPDATE payments SET consumed = 1 WHERE id = ?").run(payment.id);
   const res = db
     .prepare(
       `INSERT INTO attempts (user_id, course_id, payment_id, question_ids, deadline)
-       VALUES (?, ?, ?, ?, datetime('now', '+${QUIZ_MINUTES} minutes'))`
+       VALUES (?, ?, ?, ?, datetime('now', '+${EXAM_MINUTES} minutes'))`
     )
     .run(user.id, courseId, payment.id, JSON.stringify(chosen));
   return { attemptId: Number(res.lastInsertRowid) };
@@ -229,7 +226,7 @@ export async function submitQuiz(
     }
   }
   const total = ids.length;
-  const passed = !late && score * 100 >= PASS_PERCENT * total;
+  const passed = !late && score * 100 >= EXAM_PASS_PERCENT * total;
 
   db.prepare("UPDATE attempts SET submitted_at = datetime('now'), score = ?, total = ?, passed = ? WHERE id = ?").run(
     score,

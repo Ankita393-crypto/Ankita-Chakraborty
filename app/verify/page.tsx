@@ -53,7 +53,7 @@ export default async function VerifyPage({
               </div>
               <div>
                 <dt className="inline font-semibold">Type: </dt>
-                <dd className="inline">{cert.kind === "quiz" ? "Entry quiz achievement" : "Course completion"}</dd>
+                <dd className="inline">{cert.kind === "quiz" ? "Entrance exam pass" : "Course completion"}</dd>
               </div>
               <div>
                 <dt className="inline font-semibold">Issued: </dt>

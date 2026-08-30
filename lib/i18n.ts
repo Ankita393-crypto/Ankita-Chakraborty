@@ -6,7 +6,7 @@ const dict: Record<Lang, Record<string, string>> = {
   en: {
     tagline: "Learn anything. Prove it. For free.",
     heroSub:
-      "AI-powered lessons on every subject — from oceanography to AWS. Pass a small entry quiz to unlock any course free, and earn downloadable certificates.",
+      "AI-powered lessons on every subject — from oceanography to AWS. Pass an entrance exam to unlock any course free, and earn downloadable certificates.",
     browseCourses: "Browse courses",
     courses: "Courses",
     login: "Log in",
@@ -17,8 +17,8 @@ const dict: Record<Lang, Record<string, string>> = {
     generalSubjects: "General subjects",
     certPrep: "Certification prep",
     unlocked: "Unlocked",
-    quizRequired: "Entry quiz required",
-    startQuiz: "Pay & start entry quiz",
+    quizRequired: "Entrance exam required",
+    startQuiz: "Pay & take the entrance exam",
     disclaimer:
       "This content is AI-generated. Verify independently before professional or medical use.",
     lessons: "Lessons",
@@ -31,7 +31,7 @@ const dict: Record<Lang, Record<string, string>> = {
   hi: {
     tagline: "कुछ भी सीखें। साबित करें। मुफ़्त में।",
     heroSub:
-      "हर विषय पर AI-संचालित पाठ — समुद्र विज्ञान से AWS तक। छोटी प्रवेश क्विज़ पास करें और कोई भी कोर्स मुफ़्त में खोलें, डाउनलोड करने योग्य प्रमाणपत्र पाएं।",
+      "हर विषय पर AI-संचालित पाठ — समुद्र विज्ञान से AWS तक। प्रवेश परीक्षा पास करें और कोई भी कोर्स मुफ़्त में खोलें, डाउनलोड करने योग्य प्रमाणपत्र पाएं।",
     browseCourses: "कोर्स देखें",
     courses: "कोर्स",
     login: "लॉग इन",
@@ -42,8 +42,8 @@ const dict: Record<Lang, Record<string, string>> = {
     generalSubjects: "सामान्य विषय",
     certPrep: "प्रमाणन तैयारी",
     unlocked: "खुला हुआ",
-    quizRequired: "प्रवेश क्विज़ आवश्यक",
-    startQuiz: "भुगतान करें और क्विज़ शुरू करें",
+    quizRequired: "प्रवेश परीक्षा आवश्यक",
+    startQuiz: "भुगतान करें और प्रवेश परीक्षा दें",
     disclaimer:
       "यह सामग्री AI द्वारा बनाई गई है। व्यावसायिक या चिकित्सीय उपयोग से पहले स्वतंत्र रूप से सत्यापित करें।",
     lessons: "पाठ",
@@ -56,7 +56,7 @@ const dict: Record<Lang, Record<string, string>> = {
   bn: {
     tagline: "যেকোনো কিছু শিখুন। প্রমাণ করুন। বিনামূল্যে।",
     heroSub:
-      "প্রতিটি বিষয়ে AI-চালিত পাঠ — সমুদ্রবিদ্যা থেকে AWS পর্যন্ত। ছোট প্রবেশ কুইজ পাস করে যেকোনো কোর্স বিনামূল্যে খুলুন, ডাউনলোডযোগ্য সার্টিফিকেট অর্জন করুন।",
+      "প্রতিটি বিষয়ে AI-চালিত পাঠ — সমুদ্রবিদ্যা থেকে AWS পর্যন্ত। প্রবেশিকা পরীক্ষা পাস করে যেকোনো কোর্স বিনামূল্যে খুলুন, ডাউনলোডযোগ্য সার্টিফিকেট অর্জন করুন।",
     browseCourses: "কোর্স দেখুন",
     courses: "কোর্স",
     login: "লগ ইন",
@@ -67,8 +67,8 @@ const dict: Record<Lang, Record<string, string>> = {
     generalSubjects: "সাধারণ বিষয়",
     certPrep: "সার্টিফিকেশন প্রস্তুতি",
     unlocked: "খোলা",
-    quizRequired: "প্রবেশ কুইজ প্রয়োজন",
-    startQuiz: "পেমেন্ট করুন ও কুইজ শুরু করুন",
+    quizRequired: "প্রবেশিকা পরীক্ষা প্রয়োজন",
+    startQuiz: "পেমেন্ট করুন ও প্রবেশিকা পরীক্ষা দিন",
     disclaimer:
       "এই বিষয়বস্তু AI দ্বারা তৈরি। পেশাদার বা চিকিৎসা ব্যবহারের আগে স্বাধীনভাবে যাচাই করুন।",
     lessons: "পাঠ",

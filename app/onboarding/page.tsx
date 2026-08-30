@@ -17,7 +17,7 @@ export default async function OnboardingPage() {
     <div className="max-w-2xl mx-auto">
       <h1 className="text-2xl font-extrabold">Finish setting up your account</h1>
       <p className="mt-1 text-sm text-slate-600">
-        Two steps are required before you can purchase an entry quiz: verify your phone and upload one identity
+        Two steps are required before you can pay for an entrance exam: verify your phone and upload one identity
         document (PAN, Aadhaar, driving license, student ID, or employee ID).
       </p>
 

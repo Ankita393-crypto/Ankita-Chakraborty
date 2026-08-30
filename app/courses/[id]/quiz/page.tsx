@@ -26,9 +26,9 @@ export default async function QuizPage({ params }: { params: Promise<{ id: strin
   if (res.error === "no_payment") {
     return (
       <div className="max-w-xl mx-auto rounded-2xl bg-white border border-slate-200 p-8 text-center">
-        <h1 className="text-xl font-bold">No quiz attempt available</h1>
+        <h1 className="text-xl font-bold">No exam attempt available</h1>
         <p className="mt-2 text-sm text-slate-600">
-          You need to pay for an entry quiz attempt first (payments are final; each attempt is paid separately).
+          You need to pay for an entrance exam attempt first (payments are final; each attempt is paid separately).
         </p>
         <Link
           href={`/courses/${courseId}`}
