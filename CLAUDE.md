@@ -6,9 +6,9 @@ This file provides guidance to AI assistants (Claude and others) working with th
 
 **Repository:** Ankita393-crypto/Ankita-Chakraborty
 **Remote:** Configured via local proxy at `127.0.0.1:33433`
-**Status:** Learnzy pilot — a Next.js 16 (App Router) + TypeScript + Tailwind web app with SQLite (better-sqlite3).
+**Status:** Bodhi pilot — a Next.js 16 (App Router) + TypeScript + Tailwind web app with MongoDB (official driver; embedded local MongoDB for dev via mongodb-memory-server, MongoDB Atlas via `MONGODB_URI` for production). End-to-end tests: `node e2e-test.mjs` (Playwright, requires the dev server running).
 
-- Product: AI-powered learning platform (paid entry quiz unlocks free courses; certificates; EN/HI/BN).
+- Product: AI-powered UPSC mock-test platform (₹249 one-time per 1,000-paper mock bunch, unlimited retakes; book affiliate links on Amazon/Flipkart; free supporting lessons in EN/HI/BN, mocks in EN/HI). The earlier "pay a quiz to unlock a free course" model is cancelled — see `docs/PRODUCT_PLAN.md` Decision #16/#23.
 - Key paths: `app/actions.ts` (all server actions/business logic), `lib/db.ts` (schema), `lib/seed.ts` (demo data), `docs/` (product plan, requirements, owner guide).
 - Build: `npm run build`. Dev: `npm run dev`. Runtime data in `data/` (gitignored).
 - Pilot simulations: test-mode payments, on-screen OTP, AI generation gated on `OPENAI_API_KEY`.
