@@ -15,7 +15,9 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:3000. The database (an embedded local MongoDB stored in `data/mongo`) and demo courses are created automatically on first run — no database installation needed. To use a real cloud database instead, set `MONGODB_URI` (see `.env.example`).
+Open http://localhost:3000. The database (an embedded local MongoDB stored in `data/mongo`) and demo courses are created automatically on first run — no database installation needed.
+
+To use a real cloud database (needed for the live site): create a **Free** MongoDB Atlas cluster (not Flex), then follow **Owner's Guide section 5B** — database user `bodhi`, allow access from anywhere, Connect → Drivers, put the connection string in `.env.local` as `MONGODB_URI`. Never paste that string into chat. Template: `.env.example`.
 
 - Admin login: `admin@bodhi.test` / `admin123` (override with the `ADMIN_PASSWORD` environment variable before first run)
 - Optional environment variables: `OPENAI_API_KEY` (enables AI course generation), `AI_MODEL` (default `gpt-4o-mini`)
