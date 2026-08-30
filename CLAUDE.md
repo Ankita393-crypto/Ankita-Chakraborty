@@ -6,9 +6,13 @@ This file provides guidance to AI assistants (Claude and others) working with th
 
 **Repository:** Ankita393-crypto/Ankita-Chakraborty
 **Remote:** Configured via local proxy at `127.0.0.1:33433`
-**Status:** Initial setup — no source code committed yet.
+**Status:** Learnzy pilot — a Next.js 16 (App Router) + TypeScript + Tailwind web app with SQLite (better-sqlite3).
 
-> When source code is added, update this file to reflect the actual technology stack, structure, and conventions.
+- Product: AI-powered learning platform (paid entry quiz unlocks free courses; certificates; EN/HI/BN).
+- Key paths: `app/actions.ts` (all server actions/business logic), `lib/db.ts` (schema), `lib/seed.ts` (demo data), `docs/` (product plan, requirements, owner guide).
+- Build: `npm run build`. Dev: `npm run dev`. Runtime data in `data/` (gitignored).
+- Pilot simulations: test-mode payments, on-screen OTP, AI generation gated on `OPENAI_API_KEY`.
+- The repository owner is non-technical; keep PR descriptions and summaries in plain language.
 
 ---
 
@@ -104,3 +108,13 @@ When the project gains a defined tech stack and structure, update the following 
 3. **Testing** — add test runner commands and coverage expectations.
 4. **Dependencies** — add package manager and install instructions.
 5. **Build & Deployment** — add build commands and CI/CD pipeline overview.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
