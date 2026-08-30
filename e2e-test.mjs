@@ -11,9 +11,20 @@ fs.mkdirSync(SHOTS, { recursive: true });
 const EMAIL = `tester${Date.now()}@test.com`;
 
 // Direct read-only connection to the embedded MongoDB (to grade the exam honestly).
-const mongoPort = execSync("ps -eo args | grep -o 'mongod-x64[^ ]* --port [0-9]*' | grep -o '[0-9]*$' | head -1")
-  .toString()
-  .trim();
+const findMongoPort = () => {
+  if (process.platform === "win32") {
+    const out = execSync(
+      'powershell -NoProfile -Command "(Get-CimInstance Win32_Process | Where-Object { $_.Name -match \'mongod\' } | Select-Object -ExpandProperty CommandLine)"'
+    ).toString();
+    const match = out.match(/--port\s+(\d+)/);
+    if (!match) throw new Error("Could not find embedded mongod.exe port (is `next dev` running?)");
+    return match[1];
+  }
+  return execSync("ps -eo args | grep -o 'mongod-x64[^ ]* --port [0-9]*' | grep -o '[0-9]*$' | head -1")
+    .toString()
+    .trim();
+};
+const mongoPort = findMongoPort();
 const mongo = new MongoClient(`mongodb://127.0.0.1:${mongoPort}`);
 await mongo.connect();
 const mdb = mongo.db("bodhi");
@@ -89,10 +100,11 @@ try {
   await pendingRow.getByRole("button", { name: "Approve" }).click();
   await pendingRow.waitFor({ state: "detached" });
   const adminBody = await page.textContent("body");
+  const bankCounts = [...adminBody.matchAll(/Bank: (\d+) questions/g)].map((m) => Number(m[1]));
   const adminChecks =
     adminBody.includes("Mock series question banks") &&
-    /Bank: 100 questions/.test(adminBody) &&
-    /Bank: 36 questions/.test(adminBody) &&
+    bankCounts.length === 2 &&
+    bankCounts.every((n) => n === 100) &&
     adminBody.includes("id_approved");
   adminChecks ? ok("3 admin page + approval") : fail("3 admin page", "missing sections");
   await page.screenshot({ path: `${SHOTS}/admin.png`, fullPage: true });
