@@ -10,44 +10,87 @@ export default async function AdminPage() {
   const user = await getSessionUser();
   if (!user || !user.is_admin) redirect("/login");
 
-  const db = getDb();
-  const pendingIds = db
-    .prepare("SELECT id, name, email, phone, id_filename FROM users WHERE id_status = 'pending' ORDER BY id")
-    .all() as { id: number; name: string; email: string; phone: string; id_filename: string }[];
+  const db = await getDb();
+  const pendingIds = (await db
+    .collection("users")
+    .find({ id_status: "pending" }, { projection: { id: 1, name: 1, email: 1, phone: 1, id_filename: 1 } })
+    .sort({ id: 1 })
+    .toArray()) as unknown as { id: number; name: string; email: string; phone: string; id_filename: string }[];
 
-  const reports = db
-    .prepare(
-      `SELECT r.id, r.position, r.message, r.status, r.created_at, co.title AS course_title, u.email AS reporter
-       FROM reports r JOIN courses co ON co.id = r.course_id JOIN users u ON u.id = r.user_id
-       WHERE r.status = 'open' ORDER BY r.id DESC`
-    )
-    .all() as { id: number; position: number; message: string; status: string; created_at: string; course_title: string; reporter: string }[];
+  const reportDocs = (await db
+    .collection("reports")
+    .find({ status: "open" })
+    .sort({ id: -1 })
+    .toArray()) as unknown as {
+    id: number;
+    course_id: number;
+    position: number;
+    message: string;
+    status: string;
+    created_at: string;
+    user_id: number;
+  }[];
+  const reportCourseIds = [...new Set(reportDocs.map((r) => r.course_id))];
+  const reportUserIds = [...new Set(reportDocs.map((r) => r.user_id))];
+  const courseTitleById = new Map(
+    (
+      (await db
+        .collection("courses")
+        .find({ id: { $in: reportCourseIds } }, { projection: { id: 1, title: 1 } })
+        .toArray()) as unknown as { id: number; title: string }[]
+    ).map((c) => [c.id, c.title])
+  );
+  const emailByUserId = new Map(
+    (
+      (await db
+        .collection("users")
+        .find({ id: { $in: reportUserIds } }, { projection: { id: 1, email: 1 } })
+        .toArray()) as unknown as { id: number; email: string }[]
+    ).map((u) => [u.id, u.email])
+  );
+  const reports = reportDocs.map((r) => ({
+    id: r.id,
+    position: r.position,
+    message: r.message,
+    status: r.status,
+    created_at: r.created_at,
+    course_title: courseTitleById.get(r.course_id) ?? `Course ${r.course_id}`,
+    reporter: emailByUserId.get(r.user_id) ?? `User ${r.user_id}`,
+  }));
 
-  const courses = db
-    .prepare("SELECT id, title, published, created_by, price_inr FROM courses ORDER BY id DESC")
-    .all() as { id: number; title: string; published: number; created_by: string; price_inr: number }[];
+  const courses = (await db
+    .collection("courses")
+    .find({}, { projection: { id: 1, title: 1, published: 1, created_by: 1, price_inr: 1 } })
+    .sort({ id: -1 })
+    .toArray()) as unknown as { id: number; title: string; published: number; created_by: string; price_inr: number }[];
 
-  const log = db
-    .prepare("SELECT actor, action, detail, created_at FROM audit_log ORDER BY id DESC LIMIT 25")
-    .all() as { actor: string; action: string; detail: string; created_at: string }[];
+  const log = (await db
+    .collection("audit_log")
+    .find({}, { projection: { actor: 1, action: 1, detail: 1, created_at: 1 } })
+    .sort({ id: -1 })
+    .limit(25)
+    .toArray()) as unknown as { actor: string; action: string; detail: string; created_at: string }[];
 
+  const paymentAgg = (await db
+    .collection("payments")
+    .aggregate([{ $group: { _id: null, c: { $sum: 1 }, s: { $sum: "$amount_inr" } } }])
+    .toArray()) as { c: number; s: number }[];
   const stats = {
-    users: (db.prepare("SELECT COUNT(*) AS c FROM users").get() as { c: number }).c,
-    payments: (db.prepare("SELECT COUNT(*) AS c, COALESCE(SUM(amount_inr),0) AS s FROM payments").get() as { c: number; s: number }),
-    certs: (db.prepare("SELECT COUNT(*) AS c FROM certificates").get() as { c: number }).c,
+    users: await db.collection("users").countDocuments(),
+    payments: { c: paymentAgg[0]?.c ?? 0, s: paymentAgg[0]?.s ?? 0 },
+    certs: await db.collection("certificates").countDocuments(),
   };
 
-  const mockBanks = (
-    db
-      .prepare("SELECT id, title, paper_size, subject_quota FROM courses WHERE category = 'mock' ORDER BY id")
-      .all() as { id: number; title: string; paper_size: number | null; subject_quota: string | null }[]
-  ).map((m) => {
-    const counts = db
-      .prepare("SELECT origin, COUNT(*) AS c FROM quiz_questions WHERE course_id = ? GROUP BY origin")
-      .all(m.id) as { origin: string; c: number }[];
-    const seedCount = counts.find((r) => r.origin === "seed")?.c ?? 0;
-    const aiCount = counts.find((r) => r.origin === "ai")?.c ?? 0;
-    return {
+  const mockDocs = (await db
+    .collection("courses")
+    .find({ category: "mock" }, { projection: { id: 1, title: 1, paper_size: 1, subject_quota: 1 } })
+    .sort({ id: 1 })
+    .toArray()) as unknown as { id: number; title: string; paper_size: number | null; subject_quota: string | null }[];
+  const mockBanks = [];
+  for (const m of mockDocs) {
+    const seedCount = await db.collection("quiz_questions").countDocuments({ course_id: m.id, origin: "seed" });
+    const aiCount = await db.collection("quiz_questions").countDocuments({ course_id: m.id, origin: "ai" });
+    mockBanks.push({
       id: m.id,
       title: m.title,
       paper_size: m.paper_size ?? 100,
@@ -55,8 +98,8 @@ export default async function AdminPage() {
       seedCount,
       aiCount,
       subjects: Object.keys(m.subject_quota ? JSON.parse(m.subject_quota) : {}),
-    };
-  });
+    });
+  }
 
   return (
     <div className="space-y-10">

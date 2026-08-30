@@ -11,14 +11,13 @@ const LEVEL_LABELS: Record<string, string> = {
   state: "State government",
 };
 
-export default function ExamsPage() {
-  const db = getDb();
+export default async function ExamsPage() {
+  const db = await getDb();
   const slugs = Array.from(new Set(EXAM_DIRECTORY.flatMap((e) => e.subjects)));
-  const rows = db
-    .prepare(
-      `SELECT id, slug, title FROM courses WHERE published = 1 AND slug IN (${slugs.map(() => "?").join(",")})`
-    )
-    .all(...slugs) as { id: number; slug: string; title: string }[];
+  const rows = (await db
+    .collection("courses")
+    .find({ published: 1, slug: { $in: slugs } }, { projection: { id: 1, slug: 1, title: 1 } })
+    .toArray()) as unknown as { id: number; slug: string; title: string }[];
   const courseBySlug = new Map(rows.map((r) => [r.slug, r]));
 
   return (

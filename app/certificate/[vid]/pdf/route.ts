@@ -17,18 +17,20 @@ export async function GET(_req: Request, { params }: { params: Promise<{ vid: st
   if (!user) return new NextResponse("Please log in", { status: 401 });
 
   const { vid } = await params;
-  const cert = getDb()
-    .prepare(
-      `SELECT c.verification_id, c.kind, c.name_on_cert, c.issued_at, c.user_id, co.title AS course_title
-       FROM certificates c JOIN courses co ON co.id = c.course_id
-       WHERE c.verification_id = ?`
-    )
-    .get(vid.toUpperCase()) as
-    | { verification_id: string; kind: string; name_on_cert: string; issued_at: string; user_id: number; course_title: string }
-    | undefined;
-  if (!cert || (cert.user_id !== user.id && !user.is_admin)) {
+  const db = await getDb();
+  const row = (await db.collection("certificates").findOne({ verification_id: vid.toUpperCase() })) as {
+    verification_id: string;
+    kind: string;
+    name_on_cert: string;
+    issued_at: string;
+    user_id: number;
+    course_id: number;
+  } | null;
+  if (!row || (row.user_id !== user.id && !user.is_admin)) {
     return new NextResponse("Not found", { status: 404 });
   }
+  const courseDoc = (await db.collection("courses").findOne({ id: row.course_id })) as { title: string } | null;
+  const cert = { ...row, course_title: courseDoc?.title ?? "Unknown course" };
 
   const pdf = await PDFDocument.create();
   const page = pdf.addPage([842, 595]); // A4 landscape

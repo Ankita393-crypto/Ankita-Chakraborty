@@ -1,6 +1,7 @@
-import type { Database } from "better-sqlite3";
+import type { Db } from "mongodb";
 import bcrypt from "bcryptjs";
 import type { SeedCourse, SeedMock } from "./seed-types";
+import { nextId, now } from "./db";
 import { upscGs1Mock } from "./seed-mocks/upsc-gs1";
 import { upscCsatMock } from "./seed-mocks/upsc-csat";
 import { class10Maths } from "./seed-courses/maths";
@@ -21,54 +22,101 @@ const courses: SeedCourse[] = [
   englishGovtExams,
 ];
 
-export function seed(db: Database) {
+export async function seed(db: Db) {
   const adminEmail = "admin@learnzy.test";
   const adminPass = process.env.ADMIN_PASSWORD || "admin123";
-  db.prepare(
-    "INSERT INTO users (email, password_hash, name, phone, phone_verified, id_status, is_admin) VALUES (?, ?, ?, ?, 1, 'approved', 1)"
-  ).run(adminEmail, bcrypt.hashSync(adminPass, 10), "Learnzy Admin", "+910000000000");
-
-  const insertCourse = db.prepare(
-    "INSERT INTO courses (slug, title, description, category, tier, price_inr, created_by) VALUES (?, ?, ?, ?, ?, ?, 'seed')"
-  );
-  const insertLesson = db.prepare(
-    "INSERT INTO lessons (course_id, position, language, title, content) VALUES (?, ?, 'en', ?, ?)"
-  );
-  const insertQuestion = db.prepare(
-    "INSERT INTO quiz_questions (course_id, question, options, correct_index) VALUES (?, ?, ?, ?)"
-  );
+  await db.collection("users").insertOne({
+    id: await nextId(db, "users"),
+    email: adminEmail,
+    password_hash: bcrypt.hashSync(adminPass, 10),
+    name: "Learnzy Admin",
+    phone: "+910000000000",
+    phone_verified: 1,
+    language: "en",
+    id_status: "approved",
+    id_filename: null,
+    id_reject_reason: null,
+    is_admin: 1,
+    created_at: now(),
+  });
 
   for (const c of courses) {
-    const res = insertCourse.run(c.slug, c.title, c.description, c.category, c.tier, c.price_inr);
-    const courseId = Number(res.lastInsertRowid);
-    c.lessons.forEach((l, i) => insertLesson.run(courseId, i + 1, l.title, l.content));
-    c.questions.forEach((qq) => insertQuestion.run(courseId, qq.q, JSON.stringify(qq.options), qq.correct));
+    const courseId = await nextId(db, "courses");
+    await db.collection("courses").insertOne({
+      id: courseId,
+      slug: c.slug,
+      title: c.title,
+      description: c.description,
+      category: c.category,
+      tier: c.tier,
+      price_inr: c.price_inr,
+      published: 1,
+      created_by: "seed",
+      exam_minutes: null,
+      marks_correct: null,
+      marks_wrong: null,
+      paper_count: null,
+      paper_size: null,
+      subject_quota: null,
+      created_at: now(),
+    });
+    if (c.lessons.length > 0) {
+      await db.collection("lessons").insertMany(
+        c.lessons.map((l, i) => ({
+          course_id: courseId,
+          position: i + 1,
+          language: "en",
+          title: l.title,
+          content: l.content,
+        }))
+      );
+    }
+    for (const qq of c.questions) {
+      await db.collection("quiz_questions").insertOne({
+        id: await nextId(db, "quiz_questions"),
+        course_id: courseId,
+        question: qq.q,
+        options: JSON.stringify(qq.options),
+        correct_index: qq.correct,
+        subject: null,
+        explanation: null,
+        origin: "seed",
+      });
+    }
   }
 
   const mocks: SeedMock[] = [upscGs1Mock, upscCsatMock];
-  const insertMock = db.prepare(
-    `INSERT INTO courses (slug, title, description, category, tier, price_inr, exam_minutes, marks_correct, marks_wrong, paper_count, paper_size, subject_quota, created_by)
-     VALUES (?, ?, ?, 'mock', 5, ?, ?, ?, ?, ?, ?, ?, 'seed')`
-  );
-  const insertMockQ = db.prepare(
-    "INSERT INTO quiz_questions (course_id, question, options, correct_index, subject, explanation, origin) VALUES (?, ?, ?, ?, ?, ?, 'seed')"
-  );
   for (const m of mocks) {
-    const res = insertMock.run(
-      m.slug,
-      m.title,
-      m.description,
-      m.price_inr,
-      m.exam_minutes,
-      m.marks_correct,
-      m.marks_wrong,
-      m.paper_count,
-      m.paper_size,
-      JSON.stringify(m.subject_quota)
-    );
-    const mockId = Number(res.lastInsertRowid);
-    m.questions.forEach((qq) =>
-      insertMockQ.run(mockId, qq.q, JSON.stringify(qq.options), qq.correct, qq.subject, qq.explanation)
-    );
+    const mockId = await nextId(db, "courses");
+    await db.collection("courses").insertOne({
+      id: mockId,
+      slug: m.slug,
+      title: m.title,
+      description: m.description,
+      category: "mock",
+      tier: 5,
+      price_inr: m.price_inr,
+      published: 1,
+      created_by: "seed",
+      exam_minutes: m.exam_minutes,
+      marks_correct: m.marks_correct,
+      marks_wrong: m.marks_wrong,
+      paper_count: m.paper_count,
+      paper_size: m.paper_size,
+      subject_quota: JSON.stringify(m.subject_quota),
+      created_at: now(),
+    });
+    for (const qq of m.questions) {
+      await db.collection("quiz_questions").insertOne({
+        id: await nextId(db, "quiz_questions"),
+        course_id: mockId,
+        question: qq.q,
+        options: JSON.stringify(qq.options),
+        correct_index: qq.correct,
+        subject: qq.subject,
+        explanation: qq.explanation,
+        origin: "seed",
+      });
+    }
   }
 }

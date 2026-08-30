@@ -4,9 +4,13 @@ import { getDb } from "@/lib/db";
 
 export default async function Home() {
   const d = await t();
-  const courses = getDb()
-    .prepare("SELECT id, title, description, category, price_inr FROM courses WHERE published = 1 ORDER BY tier LIMIT 4")
-    .all() as { id: number; title: string; description: string; category: string; price_inr: number }[];
+  const db = await getDb();
+  const courses = (await db
+    .collection("courses")
+    .find({ published: 1 }, { projection: { id: 1, title: 1, description: 1, category: 1, price_inr: 1 } })
+    .sort({ tier: 1 })
+    .limit(4)
+    .toArray()) as unknown as { id: number; title: string; description: string; category: string; price_inr: number }[];
 
   return (
     <div>

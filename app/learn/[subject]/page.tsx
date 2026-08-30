@@ -29,24 +29,30 @@ export default async function LearnSubjectPage({ params }: { params: Promise<{ s
   if (!user) redirect("/login");
 
   const lang = await getLang();
-  const db = getDb();
+  const db = await getDb();
 
+  type Note = { title: string; content: string; source: string; created_at: string };
   // 1. Cached chapter?
-  let note = db
-    .prepare("SELECT title, content, source, created_at FROM subject_notes WHERE subject = ? AND language = ?")
-    .get(subject, lang) as { title: string; content: string; source: string; created_at: string } | undefined;
+  let note = (await db.collection("subject_notes").findOne({ subject, language: lang })) as Note | null;
 
   // 2. Generate on demand when AI is available — "the world is the knowledgebase".
   let generationError: string | null = null;
   if (!note && aiAvailable()) {
     try {
       const generated = await generateSubjectNotes(subject, lang);
-      db.prepare(
-        "INSERT OR IGNORE INTO subject_notes (subject, language, title, content, source) VALUES (?, ?, ?, ?, 'ai')"
-      ).run(subject, lang, generated.title.slice(0, 200), generated.content);
-      note = db
-        .prepare("SELECT title, content, source, created_at FROM subject_notes WHERE subject = ? AND language = ?")
-        .get(subject, lang) as typeof note;
+      await db.collection("subject_notes").updateOne(
+        { subject, language: lang },
+        {
+          $setOnInsert: {
+            title: generated.title.slice(0, 200),
+            content: generated.content,
+            source: "ai",
+            created_at: new Date().toISOString().replace("T", " ").slice(0, 19),
+          },
+        },
+        { upsert: true }
+      );
+      note = (await db.collection("subject_notes").findOne({ subject, language: lang })) as Note | null;
     } catch (e) {
       generationError = e instanceof Error ? e.message : "Generation failed.";
     }
@@ -55,11 +61,10 @@ export default async function LearnSubjectPage({ params }: { params: Promise<{ s
   const relatedSlugs = RELATED_COURSE_SLUGS[subject] ?? [];
   const related =
     relatedSlugs.length > 0
-      ? (db
-          .prepare(
-            `SELECT id, title FROM courses WHERE published = 1 AND slug IN (${relatedSlugs.map(() => "?").join(",")})`
-          )
-          .all(...relatedSlugs) as { id: number; title: string }[])
+      ? ((await db
+          .collection("courses")
+          .find({ published: 1, slug: { $in: relatedSlugs } }, { projection: { id: 1, title: 1 } })
+          .toArray()) as unknown as { id: number; title: string }[])
       : [];
 
   return (

@@ -9,12 +9,12 @@ export const dynamic = "force-dynamic";
 export default async function CoursesPage() {
   const d = await t();
   const user = await getSessionUser();
-  const db = getDb();
-  const courses = db
-    .prepare(
-      "SELECT id, title, description, category, tier, price_inr, paper_count FROM courses WHERE published = 1 ORDER BY category, tier"
-    )
-    .all() as {
+  const db = await getDb();
+  const courses = (await db
+    .collection("courses")
+    .find({ published: 1 })
+    .sort({ category: 1, tier: 1 })
+    .toArray()) as unknown as {
     id: number;
     title: string;
     description: string;
@@ -26,9 +26,12 @@ export default async function CoursesPage() {
 
   const unlocked = new Set<number>(
     user
-      ? (db.prepare("SELECT course_id FROM unlocks WHERE user_id = ?").all(user.id) as { course_id: number }[]).map(
-          (r) => r.course_id
-        )
+      ? (
+          (await db
+            .collection("unlocks")
+            .find({ user_id: user.id }, { projection: { course_id: 1 } })
+            .toArray()) as unknown as { course_id: number }[]
+        ).map((r) => r.course_id)
       : []
   );
 

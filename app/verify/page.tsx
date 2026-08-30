@@ -9,16 +9,29 @@ export default async function VerifyPage({
 }) {
   const { id } = await searchParams;
   const vid = (id ?? "").trim().toUpperCase();
-  const cert = vid
-    ? (getDb()
-        .prepare(
-          `SELECT c.verification_id, c.kind, c.name_on_cert, c.issued_at, co.title AS course_title
-           FROM certificates c JOIN courses co ON co.id = c.course_id WHERE c.verification_id = ?`
-        )
-        .get(vid) as
-        | { verification_id: string; kind: string; name_on_cert: string; issued_at: string; course_title: string }
-        | undefined)
-    : undefined;
+  let cert:
+    | { verification_id: string; kind: string; name_on_cert: string; issued_at: string; course_title: string }
+    | undefined;
+  if (vid) {
+    const db = await getDb();
+    const c = (await db.collection("certificates").findOne({ verification_id: vid })) as {
+      verification_id: string;
+      kind: string;
+      name_on_cert: string;
+      issued_at: string;
+      course_id: number;
+    } | null;
+    if (c) {
+      const course = (await db.collection("courses").findOne({ id: c.course_id })) as { title: string } | null;
+      cert = {
+        verification_id: c.verification_id,
+        kind: c.kind,
+        name_on_cert: c.name_on_cert,
+        issued_at: c.issued_at,
+        course_title: course?.title ?? "Unknown course",
+      };
+    }
+  }
 
   return (
     <div className="max-w-xl mx-auto">

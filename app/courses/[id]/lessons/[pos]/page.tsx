@@ -19,8 +19,8 @@ export default async function LessonPage({
   const user = await getSessionUser();
   if (!user) redirect("/login");
 
-  const db = getDb();
-  const unlocked = db.prepare("SELECT 1 FROM unlocks WHERE user_id = ? AND course_id = ?").get(user.id, courseId);
+  const db = await getDb();
+  const unlocked = await db.collection("unlocks").findOne({ user_id: user.id, course_id: courseId });
   if (!unlocked) redirect(`/courses/${courseId}`);
 
   const lang = await getLang();
@@ -28,19 +28,24 @@ export default async function LessonPage({
 
   // Prefer the lesson in the user's language; fall back to any available language.
   const lesson =
-    (db
-      .prepare("SELECT title, content, language FROM lessons WHERE course_id = ? AND position = ? AND language = ?")
-      .get(courseId, position, lang) as { title: string; content: string; language: string } | undefined) ??
-    (db
-      .prepare("SELECT title, content, language FROM lessons WHERE course_id = ? AND position = ? ORDER BY language LIMIT 1")
-      .get(courseId, position) as { title: string; content: string; language: string } | undefined);
+    ((await db
+      .collection("lessons")
+      .findOne({ course_id: courseId, position, language: lang })) as {
+      title: string;
+      content: string;
+      language: string;
+    } | null) ??
+    ((await db
+      .collection("lessons")
+      .find({ course_id: courseId, position })
+      .sort({ language: 1 })
+      .limit(1)
+      .next()) as { title: string; content: string; language: string } | null);
   if (!lesson) notFound();
 
-  const total = (
-    db.prepare("SELECT COUNT(DISTINCT position) AS c FROM lessons WHERE course_id = ?").get(courseId) as { c: number }
-  ).c;
+  const total = (await db.collection("lessons").distinct("position", { course_id: courseId })).length;
   const isDone = Boolean(
-    db.prepare("SELECT 1 FROM progress WHERE user_id = ? AND course_id = ? AND position = ?").get(user.id, courseId, position)
+    await db.collection("progress").findOne({ user_id: user.id, course_id: courseId, position })
   );
 
   return (

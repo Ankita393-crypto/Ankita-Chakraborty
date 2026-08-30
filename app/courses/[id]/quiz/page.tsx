@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { getDb } from "@/lib/db";
+import { getDb, parseDbDate } from "@/lib/db";
 import { getSessionUser } from "@/lib/auth";
 import { startAttempt } from "@/app/actions";
 import { QuizRunner } from "./runner";
@@ -20,19 +20,15 @@ export default async function QuizPage({
   const user = await getSessionUser();
   if (!user) redirect("/login");
 
-  const db = getDb();
-  const course = db
-    .prepare("SELECT id, title, category, marks_correct, marks_wrong, paper_count FROM courses WHERE id = ? AND published = 1")
-    .get(courseId) as
-    | {
-        id: number;
-        title: string;
-        category: string;
-        marks_correct: number | null;
-        marks_wrong: number | null;
-        paper_count: number | null;
-      }
-    | undefined;
+  const db = await getDb();
+  const course = (await db.collection("courses").findOne({ id: courseId, published: 1 })) as {
+    id: number;
+    title: string;
+    category: string;
+    marks_correct: number | null;
+    marks_wrong: number | null;
+    paper_count: number | null;
+  } | null;
   if (!course) notFound();
   const isMock = course.category === "mock";
 
@@ -43,7 +39,7 @@ export default async function QuizPage({
       redirect(`/courses/${courseId}`);
     }
   } else {
-    const already = db.prepare("SELECT 1 FROM unlocks WHERE user_id = ? AND course_id = ?").get(user.id, courseId);
+    const already = await db.collection("unlocks").findOne({ user_id: user.id, course_id: courseId });
     if (already) redirect(`/courses/${courseId}`);
   }
 
@@ -68,26 +64,24 @@ export default async function QuizPage({
   }
   if (!res.attemptId) redirect(`/courses/${courseId}`);
 
-  const attempt = db.prepare("SELECT question_ids, deadline FROM attempts WHERE id = ?").get(res.attemptId) as {
+  const attempt = (await db
+    .collection("attempts")
+    .findOne({ id: res.attemptId }, { projection: { question_ids: 1, deadline: 1 } })) as {
     question_ids: string;
     deadline: string;
-  };
+  } | null;
+  if (!attempt) redirect(`/courses/${courseId}`);
   const ids = JSON.parse(attempt.question_ids) as number[];
   const questions = (
-    db
-      .prepare(`SELECT id, question, options FROM quiz_questions WHERE id IN (${ids.map(() => "?").join(",")})`)
-      .all(...ids) as { id: number; question: string; options: string }[]
+    (await db
+      .collection("quiz_questions")
+      .find({ id: { $in: ids } }, { projection: { id: 1, question: 1, options: 1 } })
+      .toArray()) as unknown as { id: number; question: string; options: string }[]
   )
     .sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id))
     .map((q) => ({ id: q.id, question: q.question, options: JSON.parse(q.options) as string[] }));
 
-  const secondsLeft = Math.max(
-    0,
-    Math.floor(
-      ((db.prepare("SELECT (julianday(?) - julianday('now')) * 86400 AS s").get(attempt.deadline) as { s: number })
-        .s ?? 0)
-    )
-  );
+  const secondsLeft = Math.max(0, Math.floor((parseDbDate(attempt.deadline) - Date.now()) / 1000));
 
   return (
     <QuizRunner

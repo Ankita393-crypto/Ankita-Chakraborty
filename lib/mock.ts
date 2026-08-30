@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import type { Database } from "better-sqlite3";
+import type { Db } from "mongodb";
 
 // Paper composition — the "permutation and combination" engine.
 //
@@ -16,16 +16,21 @@ function paperHash(seriesId: number, paperNo: number, questionId: number): Buffe
   return crypto.createHash("sha256").update(`${seriesId}:${paperNo}:${questionId}`).digest();
 }
 
-export function composePaper(db: Database, seriesId: number, paperNo: number): number[] {
-  const course = db
-    .prepare("SELECT paper_size, subject_quota FROM courses WHERE id = ?")
-    .get(seriesId) as { paper_size: number | null; subject_quota: string | null };
+export async function composePaper(db: Db, seriesId: number, paperNo: number): Promise<number[]> {
+  const course = (await db
+    .collection("courses")
+    .findOne({ id: seriesId }, { projection: { paper_size: 1, subject_quota: 1 } })) as {
+    paper_size: number | null;
+    subject_quota: string | null;
+  } | null;
+  if (!course) return [];
   const paperSize = course.paper_size ?? 100;
   const quota = (course.subject_quota ? JSON.parse(course.subject_quota) : {}) as Record<string, number>;
 
-  const bank = db
-    .prepare("SELECT id, subject FROM quiz_questions WHERE course_id = ?")
-    .all(seriesId) as { id: number; subject: string | null }[];
+  const bank = (await db
+    .collection("quiz_questions")
+    .find({ course_id: seriesId }, { projection: { id: 1, subject: 1 } })
+    .toArray()) as unknown as { id: number; subject: string | null }[];
 
   const bySubject = new Map<string, number[]>();
   for (const q of bank) {
@@ -59,12 +64,4 @@ export function composePaper(db: Database, seriesId: number, paperNo: number): n
 
   // Final question order is also paper-specific (a fresh permutation).
   return sortForPaper(chosen.slice(0, paperSize));
-}
-
-// How distinct papers currently are: with a bank of B questions and papers of
-// size S, papers share questions when B is small. Shown honestly in the UI.
-export function bankStats(db: Database, seriesId: number): { bankSize: number; paperSize: number } {
-  const bankSize = (db.prepare("SELECT COUNT(*) AS c FROM quiz_questions WHERE course_id = ?").get(seriesId) as { c: number }).c;
-  const course = db.prepare("SELECT paper_size FROM courses WHERE id = ?").get(seriesId) as { paper_size: number | null };
-  return { bankSize, paperSize: course.paper_size ?? 100 };
 }

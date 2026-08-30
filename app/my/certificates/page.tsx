@@ -9,13 +9,27 @@ export default async function MyCertificatesPage() {
   const user = await getSessionUser();
   if (!user) redirect("/login");
 
-  const certs = getDb()
-    .prepare(
-      `SELECT c.verification_id, c.kind, c.issued_at, co.title AS course_title
-       FROM certificates c JOIN courses co ON co.id = c.course_id
-       WHERE c.user_id = ? ORDER BY c.issued_at DESC`
-    )
-    .all(user.id) as { verification_id: string; kind: string; issued_at: string; course_title: string }[];
+  const db = await getDb();
+  const rows = (await db
+    .collection("certificates")
+    .find({ user_id: user.id })
+    .sort({ issued_at: -1 })
+    .toArray()) as unknown as { verification_id: string; kind: string; issued_at: string; course_id: number }[];
+  const courseIds = [...new Set(rows.map((r) => r.course_id))];
+  const titleById = new Map(
+    (
+      (await db
+        .collection("courses")
+        .find({ id: { $in: courseIds } }, { projection: { id: 1, title: 1 } })
+        .toArray()) as unknown as { id: number; title: string }[]
+    ).map((c) => [c.id, c.title])
+  );
+  const certs = rows.map((r) => ({
+    verification_id: r.verification_id,
+    kind: r.kind,
+    issued_at: r.issued_at,
+    course_title: titleById.get(r.course_id) ?? "Unknown course",
+  }));
 
   return (
     <div className="max-w-2xl mx-auto">

@@ -10,16 +10,18 @@ export default async function CertificatePage({ params }: { params: Promise<{ vi
   const user = await getSessionUser();
   if (!user) redirect("/login");
 
-  const cert = getDb()
-    .prepare(
-      `SELECT c.verification_id, c.kind, c.name_on_cert, c.issued_at, c.user_id, co.title AS course_title
-       FROM certificates c JOIN courses co ON co.id = c.course_id
-       WHERE c.verification_id = ?`
-    )
-    .get(vid.toUpperCase()) as
-    | { verification_id: string; kind: string; name_on_cert: string; issued_at: string; user_id: number; course_title: string }
-    | undefined;
-  if (!cert || (cert.user_id !== user.id && !user.is_admin)) notFound();
+  const db = await getDb();
+  const row = (await db.collection("certificates").findOne({ verification_id: vid.toUpperCase() })) as {
+    verification_id: string;
+    kind: string;
+    name_on_cert: string;
+    issued_at: string;
+    user_id: number;
+    course_id: number;
+  } | null;
+  if (!row || (row.user_id !== user.id && !user.is_admin)) notFound();
+  const courseDoc = (await db.collection("courses").findOne({ id: row.course_id })) as { title: string } | null;
+  const cert = { ...row, course_title: courseDoc?.title ?? "Unknown course" };
 
   const date = cert.issued_at.slice(0, 10);
 

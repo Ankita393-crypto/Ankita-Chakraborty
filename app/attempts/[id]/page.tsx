@@ -13,34 +13,31 @@ export default async function AnswerPaperPage({ params }: { params: Promise<{ id
   const user = await getSessionUser();
   if (!user) redirect("/login");
 
-  const db = getDb();
-  const attempt = db
-    .prepare("SELECT * FROM attempts WHERE id = ? AND submitted_at IS NOT NULL")
-    .get(Number(id)) as
-    | {
-        id: number;
-        user_id: number;
-        course_id: number;
-        question_ids: string;
-        submitted_at: string;
-        score: number;
-        total: number;
-        answers: string | null;
-        marks: number | null;
-      }
-    | undefined;
+  const db = await getDb();
+  const attempt = (await db
+    .collection("attempts")
+    .findOne({ id: Number(id), submitted_at: { $ne: null } })) as {
+    id: number;
+    user_id: number;
+    course_id: number;
+    question_ids: string;
+    submitted_at: string;
+    score: number;
+    total: number;
+    answers: string | null;
+    marks: number | null;
+  } | null;
   if (!attempt) notFound();
   if (attempt.user_id !== user.id && !user.is_admin) notFound();
 
-  const course = db
-    .prepare("SELECT id, title, category, marks_correct, marks_wrong FROM courses WHERE id = ?")
-    .get(attempt.course_id) as {
+  const course = (await db.collection("courses").findOne({ id: attempt.course_id })) as {
     id: number;
     title: string;
     category: string;
     marks_correct: number | null;
     marks_wrong: number | null;
-  };
+  } | null;
+  if (!course) notFound();
   const isMock = course.category === "mock";
   const mc = course.marks_correct ?? 1;
   const mw = course.marks_wrong ?? 0;
@@ -48,13 +45,10 @@ export default async function AnswerPaperPage({ params }: { params: Promise<{ id
   const ids = JSON.parse(attempt.question_ids) as number[];
   const answers = (attempt.answers ? JSON.parse(attempt.answers) : {}) as Record<string, number>;
   const questions = (
-    db
-      .prepare(
-        `SELECT id, question, options, correct_index, subject, explanation FROM quiz_questions WHERE id IN (${ids
-          .map(() => "?")
-          .join(",")})`
-      )
-      .all(...ids) as {
+    (await db
+      .collection("quiz_questions")
+      .find({ id: { $in: ids } })
+      .toArray()) as unknown as {
       id: number;
       question: string;
       options: string;

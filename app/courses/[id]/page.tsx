@@ -17,73 +17,72 @@ export default async function CoursePage({
   const { id } = await params;
   const { page } = await searchParams;
   const d = await t();
-  const db = getDb();
-  const course = db
-    .prepare("SELECT * FROM courses WHERE id = ? AND published = 1")
-    .get(Number(id)) as
-    | {
-        id: number;
-        title: string;
-        description: string;
-        category: string;
-        tier: number;
-        price_inr: number;
-        exam_minutes: number | null;
-        marks_correct: number | null;
-        marks_wrong: number | null;
-        paper_count: number | null;
-        paper_size: number | null;
-      }
-    | undefined;
+  const db = await getDb();
+  const course = (await db.collection("courses").findOne({ id: Number(id), published: 1 })) as {
+    id: number;
+    title: string;
+    description: string;
+    category: string;
+    tier: number;
+    price_inr: number;
+    exam_minutes: number | null;
+    marks_correct: number | null;
+    marks_wrong: number | null;
+    paper_count: number | null;
+    paper_size: number | null;
+  } | null;
   if (!course) notFound();
   const isMock = course.category === "mock";
 
   const user = await getSessionUser();
   const isUnlocked = user
-    ? Boolean(db.prepare("SELECT 1 FROM unlocks WHERE user_id = ? AND course_id = ?").get(user.id, course.id))
+    ? Boolean(await db.collection("unlocks").findOne({ user_id: user.id, course_id: course.id }))
     : false;
 
-  const lessons = db
-    .prepare(
-      "SELECT DISTINCT position, title FROM lessons WHERE course_id = ? ORDER BY position"
-    )
-    .all(course.id) as { position: number; title: string }[];
+  const lessonDocs = (await db
+    .collection("lessons")
+    .find({ course_id: course.id }, { projection: { position: 1, title: 1 } })
+    .sort({ position: 1 })
+    .toArray()) as unknown as { position: number; title: string }[];
+  const seen = new Set<number>();
+  const lessons = lessonDocs.filter((l) => (seen.has(l.position) ? false : (seen.add(l.position), true)));
 
   const doneSet = new Set<number>(
     user && isUnlocked
       ? (
-          db.prepare("SELECT position FROM progress WHERE user_id = ? AND course_id = ?").all(user.id, course.id) as {
-            position: number;
-          }[]
+          (await db
+            .collection("progress")
+            .find({ user_id: user.id, course_id: course.id }, { projection: { position: 1 } })
+            .toArray()) as unknown as { position: number }[]
         ).map((r) => r.position)
       : []
   );
 
   const certs =
     user &&
-    (db
-      .prepare("SELECT verification_id, kind FROM certificates WHERE user_id = ? AND course_id = ?")
-      .all(user.id, course.id) as { verification_id: string; kind: string }[]);
+    ((await db
+      .collection("certificates")
+      .find({ user_id: user.id, course_id: course.id }, { projection: { verification_id: 1, kind: 1 } })
+      .toArray()) as unknown as { verification_id: string; kind: string }[]);
 
   const canPay = user && user.phone_verified && user.id_status === "approved";
 
-  const questionCount = (
-    db.prepare("SELECT COUNT(*) AS c FROM quiz_questions WHERE course_id = ?").get(course.id) as { c: number }
-  ).c;
-  const myAttempts = isMock && user
-    ? (db
-        .prepare(
-          "SELECT id, submitted_at, score, total, marks, paper_no FROM attempts WHERE user_id = ? AND course_id = ? AND submitted_at IS NOT NULL ORDER BY id DESC"
-        )
-        .all(user.id, course.id) as {
-        id: number;
-        submitted_at: string;
-        score: number;
-        total: number;
-        marks: number | null;
-        paper_no: number | null;
-      }[])
-    : [];
+  const questionCount = await db.collection("quiz_questions").countDocuments({ course_id: course.id });
+  const myAttempts =
+    isMock && user
+      ? ((await db
+          .collection("attempts")
+          .find({ user_id: user.id, course_id: course.id, submitted_at: { $ne: null } })
+          .sort({ id: -1 })
+          .toArray()) as unknown as {
+          id: number;
+          submitted_at: string;
+          score: number;
+          total: number;
+          marks: number | null;
+          paper_no: number | null;
+        }[])
+      : [];
 
   if (isMock) {
     const paperCount = course.paper_count ?? 1;
