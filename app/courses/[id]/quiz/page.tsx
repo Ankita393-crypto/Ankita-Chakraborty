@@ -14,13 +14,18 @@ export default async function QuizPage({ params }: { params: Promise<{ id: strin
   if (!user) redirect("/login");
 
   const db = getDb();
-  const course = db.prepare("SELECT id, title FROM courses WHERE id = ? AND published = 1").get(courseId) as
-    | { id: number; title: string }
+  const course = db
+    .prepare("SELECT id, title, category, marks_correct, marks_wrong FROM courses WHERE id = ? AND published = 1")
+    .get(courseId) as
+    | { id: number; title: string; category: string; marks_correct: number | null; marks_wrong: number | null }
     | undefined;
   if (!course) notFound();
+  const isMock = course.category === "mock";
 
-  const already = db.prepare("SELECT 1 FROM unlocks WHERE user_id = ? AND course_id = ?").get(user.id, courseId);
-  if (already) redirect(`/courses/${courseId}`);
+  if (!isMock) {
+    const already = db.prepare("SELECT 1 FROM unlocks WHERE user_id = ? AND course_id = ?").get(user.id, courseId);
+    if (already) redirect(`/courses/${courseId}`);
+  }
 
   const res = await startAttempt(courseId);
   if (res.error === "no_payment") {
@@ -69,6 +74,9 @@ export default async function QuizPage({ params }: { params: Promise<{ id: strin
       courseTitle={course.title}
       questions={questions}
       secondsLeft={secondsLeft}
+      isMock={isMock}
+      marksCorrect={course.marks_correct ?? 1}
+      marksWrong={course.marks_wrong ?? 0}
     />
   );
 }

@@ -177,17 +177,31 @@ export async function startAttempt(courseId: number): Promise<{ attemptId?: numb
     .get(user.id, courseId) as { id: number } | undefined;
   if (!payment) return { error: "no_payment" };
 
+  const course = db.prepare("SELECT category, exam_minutes FROM courses WHERE id = ?").get(courseId) as {
+    category: string;
+    exam_minutes: number | null;
+  };
+  const isMock = course.category === "mock";
+
   const questions = db
-    .prepare("SELECT id FROM quiz_questions WHERE course_id = ?")
+    .prepare("SELECT id FROM quiz_questions WHERE course_id = ? ORDER BY id")
     .all(courseId) as { id: number }[];
-  const shuffled = questions.map((q) => q.id).sort(() => Math.random() - 0.5);
-  const chosen = shuffled.slice(0, Math.min(EXAM_QUESTIONS_PER_ATTEMPT, shuffled.length));
+  // Mock papers present the FULL paper in its set order (like the real exam);
+  // entrance exams draw a random subset from the bank.
+  let chosen: number[];
+  if (isMock) {
+    chosen = questions.map((q) => q.id);
+  } else {
+    const shuffled = questions.map((q) => q.id).sort(() => Math.random() - 0.5);
+    chosen = shuffled.slice(0, Math.min(EXAM_QUESTIONS_PER_ATTEMPT, shuffled.length));
+  }
+  const minutes = isMock && course.exam_minutes ? course.exam_minutes : EXAM_MINUTES;
 
   db.prepare("UPDATE payments SET consumed = 1 WHERE id = ?").run(payment.id);
   const res = db
     .prepare(
       `INSERT INTO attempts (user_id, course_id, payment_id, question_ids, deadline)
-       VALUES (?, ?, ?, ?, datetime('now', '+${EXAM_MINUTES} minutes'))`
+       VALUES (?, ?, ?, ?, datetime('now', '+${minutes} minutes'))`
     )
     .run(user.id, courseId, payment.id, JSON.stringify(chosen));
   return { attemptId: Number(res.lastInsertRowid) };
@@ -196,7 +210,16 @@ export async function startAttempt(courseId: number): Promise<{ attemptId?: numb
 export async function submitQuiz(
   attemptId: number,
   answers: Record<string, number>
-): Promise<{ passed?: boolean; score?: number; total?: number; error?: string }> {
+): Promise<{
+  passed?: boolean;
+  score?: number;
+  total?: number;
+  error?: string;
+  mock?: boolean;
+  marks?: number;
+  maxMarks?: number;
+  attemptId?: number;
+}> {
   const user = await getSessionUser();
   if (!user) return { error: "Please log in first." };
   const db = getDb();
@@ -206,6 +229,11 @@ export async function submitQuiz(
     | { id: number; course_id: number; question_ids: string; deadline: string }
     | undefined;
   if (!attempt) return { error: "This attempt was already submitted or does not exist." };
+
+  const course = db
+    .prepare("SELECT category, marks_correct, marks_wrong FROM courses WHERE id = ?")
+    .get(attempt.course_id) as { category: string; marks_correct: number | null; marks_wrong: number | null };
+  const isMock = course.category === "mock";
 
   const ids = JSON.parse(attempt.question_ids) as number[];
   const rows = db
@@ -220,20 +248,36 @@ export async function submitQuiz(
     }).late === 1;
 
   let score = 0;
+  let wrong = 0;
   if (!late) {
     for (const id of ids) {
-      if (answers[String(id)] === correctMap.get(id)) score++;
+      const chosen = answers[String(id)];
+      if (chosen === undefined || chosen === null) continue;
+      if (chosen === correctMap.get(id)) score++;
+      else wrong++;
     }
   }
   const total = ids.length;
+
+  if (isMock) {
+    // Real-exam scoring with negative marking; no pass/fail, no certificate —
+    // the product here is the answer paper and the weakness report.
+    const mc = course.marks_correct ?? 1;
+    const mw = course.marks_wrong ?? 0;
+    const marks = Math.round((score * mc - wrong * mw) * 100) / 100;
+    const maxMarks = Math.round(total * mc * 100) / 100;
+    db.prepare(
+      "UPDATE attempts SET submitted_at = datetime('now'), score = ?, total = ?, passed = NULL, answers = ?, marks = ? WHERE id = ?"
+    ).run(score, total, JSON.stringify(answers), marks, attemptId);
+    audit(user.email, "mock_submitted", `Mock ${attempt.course_id}: ${score} correct, ${wrong} wrong, ${marks}/${maxMarks} marks${late ? " (late)" : ""}`);
+    return { mock: true, score, total, marks, maxMarks, attemptId };
+  }
+
   const passed = !late && score * 100 >= EXAM_PASS_PERCENT * total;
 
-  db.prepare("UPDATE attempts SET submitted_at = datetime('now'), score = ?, total = ?, passed = ? WHERE id = ?").run(
-    score,
-    total,
-    passed ? 1 : 0,
-    attemptId
-  );
+  db.prepare(
+    "UPDATE attempts SET submitted_at = datetime('now'), score = ?, total = ?, passed = ?, answers = ? WHERE id = ?"
+  ).run(score, total, passed ? 1 : 0, JSON.stringify(answers), attemptId);
 
   if (passed) {
     db.prepare("INSERT OR IGNORE INTO unlocks (user_id, course_id) VALUES (?, ?)").run(user.id, attempt.course_id);

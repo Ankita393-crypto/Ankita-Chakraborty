@@ -52,11 +52,16 @@ function migrate(db: Database.Database) {
     slug TEXT NOT NULL UNIQUE,
     title TEXT NOT NULL,
     description TEXT NOT NULL,
-    category TEXT NOT NULL DEFAULT 'general', -- general | certprep
+    category TEXT NOT NULL DEFAULT 'general', -- general | certprep | mock
     tier INTEGER NOT NULL DEFAULT 3,
     price_inr INTEGER NOT NULL DEFAULT 499,
     published INTEGER NOT NULL DEFAULT 1,
     created_by TEXT NOT NULL DEFAULT 'seed', -- seed | ai | admin
+    -- Mock-exam configuration (NULL for regular courses, which use the
+    -- entrance-exam defaults from lib/config.ts):
+    exam_minutes INTEGER,       -- paper duration, e.g. 120 for UPSC GS Paper I
+    marks_correct REAL,         -- marks awarded per correct answer
+    marks_wrong REAL,           -- marks DEDUCTED per wrong answer (negative marking)
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
 
@@ -75,7 +80,9 @@ function migrate(db: Database.Database) {
     course_id INTEGER NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
     question TEXT NOT NULL,
     options TEXT NOT NULL, -- JSON array of 4 strings
-    correct_index INTEGER NOT NULL
+    correct_index INTEGER NOT NULL,
+    subject TEXT,          -- e.g. 'Indian Polity' — powers the weakness report
+    explanation TEXT       -- shown in the answer paper after submission
   );
 
   CREATE TABLE IF NOT EXISTS payments (
@@ -100,7 +107,9 @@ function migrate(db: Database.Database) {
     submitted_at TEXT,
     score INTEGER,
     total INTEGER,
-    passed INTEGER
+    passed INTEGER,
+    answers TEXT,          -- JSON map of question id -> chosen option index
+    marks REAL             -- final marks after negative marking (mock exams)
   );
 
   CREATE TABLE IF NOT EXISTS unlocks (
@@ -142,6 +151,17 @@ function migrate(db: Database.Database) {
     day TEXT NOT NULL,
     count INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY (user_id, day)
+  );
+
+  CREATE TABLE IF NOT EXISTS subject_notes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    subject TEXT NOT NULL,
+    language TEXT NOT NULL DEFAULT 'en',
+    title TEXT NOT NULL,
+    content TEXT NOT NULL,
+    source TEXT NOT NULL DEFAULT 'ai', -- ai | seed | admin
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    UNIQUE(subject, language)
   );
 
   CREATE TABLE IF NOT EXISTS audit_log (

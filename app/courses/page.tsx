@@ -23,6 +23,7 @@ export default async function CoursesPage() {
   );
 
   const groups: [string, typeof courses][] = [
+    [d.mockExams, courses.filter((c) => c.category === "mock")],
     [d.generalSubjects, courses.filter((c) => c.category === "general")],
     [d.certPrep, courses.filter((c) => c.category === "certprep")],
   ];
@@ -45,8 +46,12 @@ export default async function CoursesPage() {
                 className="rounded-2xl bg-white border border-slate-200 p-5 hover:border-indigo-300 hover:shadow-md transition"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-slate-500">Tier {c.tier}</span>
-                  {unlocked.has(c.id) ? (
+                  <span className="text-xs font-semibold text-slate-500">
+                    {c.category === "mock" ? "Full mock" : `Tier ${c.tier}`}
+                  </span>
+                  {c.category === "mock" ? (
+                    <span className="text-xs font-medium text-slate-500">Answer paper included</span>
+                  ) : unlocked.has(c.id) ? (
                     <span className="text-xs font-bold text-emerald-600">{d.unlocked}</span>
                   ) : (
                     <span className="text-xs font-medium text-slate-500">{d.quizRequired}</span>
@@ -54,7 +59,11 @@ export default async function CoursesPage() {
                 </div>
                 <h3 className="mt-1 font-bold text-lg">{c.title}</h3>
                 <p className="mt-1 text-sm text-slate-600 line-clamp-2">{c.description}</p>
-                <div className="mt-3 text-sm font-semibold text-slate-700">Entrance exam ₹{c.price_inr} · Course free</div>
+                <div className="mt-3 text-sm font-semibold text-slate-700">
+                  {c.category === "mock"
+                    ? `₹${c.price_inr} per attempt · Solutions & weakness report`
+                    : `Entrance exam ₹${c.price_inr} · Course free`}
+                </div>
               </Link>
             ))}
           </div>

@@ -1,6 +1,7 @@
 import type { Database } from "better-sqlite3";
 import bcrypt from "bcryptjs";
-import type { SeedCourse } from "./seed-types";
+import type { SeedCourse, SeedMock } from "./seed-types";
+import { upscGs1Mock } from "./seed-mocks/upsc-gs1";
 import { class10Maths } from "./seed-courses/maths";
 import { oceanography } from "./seed-courses/oceanography";
 import { awsCloudPractitioner } from "./seed-courses/aws";
@@ -41,5 +42,21 @@ export function seed(db: Database) {
     const courseId = Number(res.lastInsertRowid);
     c.lessons.forEach((l, i) => insertLesson.run(courseId, i + 1, l.title, l.content));
     c.questions.forEach((qq) => insertQuestion.run(courseId, qq.q, JSON.stringify(qq.options), qq.correct));
+  }
+
+  const mocks: SeedMock[] = [upscGs1Mock];
+  const insertMock = db.prepare(
+    `INSERT INTO courses (slug, title, description, category, tier, price_inr, exam_minutes, marks_correct, marks_wrong, created_by)
+     VALUES (?, ?, ?, 'mock', 5, ?, ?, ?, ?, 'seed')`
+  );
+  const insertMockQ = db.prepare(
+    "INSERT INTO quiz_questions (course_id, question, options, correct_index, subject, explanation) VALUES (?, ?, ?, ?, ?, ?)"
+  );
+  for (const m of mocks) {
+    const res = insertMock.run(m.slug, m.title, m.description, m.price_inr, m.exam_minutes, m.marks_correct, m.marks_wrong);
+    const mockId = Number(res.lastInsertRowid);
+    m.questions.forEach((qq) =>
+      insertMockQ.run(mockId, qq.q, JSON.stringify(qq.options), qq.correct, qq.subject, qq.explanation)
+    );
   }
 }
