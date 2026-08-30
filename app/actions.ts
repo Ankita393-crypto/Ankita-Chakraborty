@@ -16,6 +16,15 @@ const QUIZ_MINUTES = 5;
 const QUIZ_QUESTIONS_PER_ATTEMPT = 5;
 const PASS_PERCENT = 60;
 
+// Certificate IDs use an alphabet without look-alike characters (no 0/O, 1/I/L, 5/S, 8/B)
+// so people can read them off a printed certificate without mistakes.
+const CERT_ALPHABET = "2346789ACDEFGHJKMNPQRTUVWXYZ";
+function newVerificationId(): string {
+  let id = "";
+  for (let i = 0; i < 10; i++) id += CERT_ALPHABET[crypto.randomInt(CERT_ALPHABET.length)];
+  return id;
+}
+
 // ---------- language ----------
 
 export async function setLanguage(formData: FormData) {
@@ -231,7 +240,7 @@ export async function submitQuiz(
 
   if (passed) {
     db.prepare("INSERT OR IGNORE INTO unlocks (user_id, course_id) VALUES (?, ?)").run(user.id, attempt.course_id);
-    const vid = crypto.randomBytes(5).toString("hex").toUpperCase();
+    const vid = newVerificationId();
     db.prepare(
       "INSERT INTO certificates (verification_id, user_id, course_id, kind, name_on_cert) VALUES (?, ?, ?, 'quiz', ?)"
     ).run(vid, user.id, attempt.course_id, user.name);
@@ -273,7 +282,7 @@ export async function completeLesson(formData: FormData) {
       .prepare("SELECT 1 FROM certificates WHERE user_id = ? AND course_id = ? AND kind = 'completion'")
       .get(user.id, courseId);
     if (!existing) {
-      const vid = crypto.randomBytes(5).toString("hex").toUpperCase();
+      const vid = newVerificationId();
       db.prepare(
         "INSERT INTO certificates (verification_id, user_id, course_id, kind, name_on_cert) VALUES (?, ?, ?, 'completion', ?)"
       ).run(vid, user.id, courseId, user.name);
