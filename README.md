@@ -15,7 +15,7 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:3000. The database (SQLite) and demo courses are created automatically on first run.
+Open http://localhost:3000. The database (an embedded local MongoDB stored in `data/mongo`) and demo courses are created automatically on first run — no database installation needed. To use a real cloud database instead, set `MONGODB_URI` (see `.env.example`).
 
 - Admin login: `admin@learnzy.test` / `admin123` (override with the `ADMIN_PASSWORD` environment variable before first run)
 - Optional environment variables: `OPENAI_API_KEY` (enables AI course generation), `AI_MODEL` (default `gpt-4o-mini`)
@@ -23,8 +23,9 @@ Open http://localhost:3000. The database (SQLite) and demo courses are created a
 ## Stack
 
 - Next.js 16 (App Router, server actions) + TypeScript + Tailwind CSS
-- SQLite via better-sqlite3 (pilot; production migrates to Postgres)
-- Runtime data lives in `data/` (gitignored): database + uploaded ID documents
+- MongoDB (official driver). Local dev runs an embedded MongoDB automatically; production points `MONGODB_URI` at a free MongoDB Atlas cluster
+- Runtime data lives in `data/` (gitignored): embedded database files + uploaded ID documents
+- End-to-end tests: `node e2e-test.mjs` (Playwright; run while the dev server is up)
 
 ## Structure
 

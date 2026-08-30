@@ -155,9 +155,31 @@ Until either exists, the Flipkart buttons still work perfectly as plain links; y
 ### The sensible order
 
 1. **Now:** OpenAI key — it works even on your local test site and unlocks the biggest features.
-2. **Next:** hosting + domain, so the site has a public address.
+2. **Next:** MongoDB Atlas (free) + hosting + domain, so the site has a public address and permanent data.
 3. **Then:** Amazon Associates (needs the live site) and Razorpay KYC (takes days — start early).
 4. **Whenever:** Cuelinks/EarnKaro for Flipkart earnings.
+
+---
+
+## 5B. Your database: MongoDB Atlas, step by step (free)
+
+**What this is.** The database is where everything lives: accounts, payments, exam attempts, certificates. On your own computer, Learnzy runs a built-in database automatically — you install nothing, and the data sits in the project's `data/mongo` folder. That's perfect for testing. But for the live website you want the database in the cloud, so it's never wiped when the hosting service restarts, and it's backed up by professionals. MongoDB Atlas is the official cloud service, and its smallest tier (called **M0**) is genuinely free forever — no card required.
+
+**Setting it up (about 10 minutes):**
+
+1. Go to **mongodb.com/cloud/atlas** and click "Try Free". Sign up with your email or Google.
+2. It asks you to create a **cluster** (that's just their word for "your database server"). Choose the **M0 Free** tier, pick the **Mumbai (ap-south-1)** region — closest to your learners — and click Create. Leave every other setting as-is.
+3. **Create a database user** (this is not your Atlas login — it's the username/password the *website* uses to talk to the database). Atlas prompts you for this. Username: `learnzy`. Click "Autogenerate password" and **copy the password somewhere safe immediately**.
+4. **Network access:** Atlas asks which computers may connect. For the pilot choose **"Allow access from anywhere" (0.0.0.0/0)** — the database still requires the password; this only skips address-by-address approval. (Later, this can be tightened to just your hosting service's addresses.)
+5. Click **Connect → Drivers**, and Atlas shows your **connection string** — one long address that looks like:
+   `mongodb+srv://learnzy:<password>@cluster0.ab1cd.mongodb.net/`
+   Replace `<password>` (including the angle brackets) with the password from step 3.
+6. Paste it into `.env.local` as `MONGODB_URI=mongodb+srv://learnzy:...` — or, on your hosting service, add `MONGODB_URI` on its Environment Variables page. Restart the site. Done: Learnzy now reads and writes to your cloud database, and seeds the demo courses into it automatically on first run.
+
+**Rules of thumb:**
+- The connection string contains your database password — treat it exactly like an API key (never in chat/email/WhatsApp).
+- The free M0 tier holds 512 MB — far more than the whole pilot will use.
+- Your Atlas dashboard has a "Browse Collections" button: you can literally *see* your users, payments, and certificates there. Look but don't edit by hand.
 
 ---
 
