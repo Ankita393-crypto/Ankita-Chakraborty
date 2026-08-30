@@ -7,8 +7,15 @@ import { payForQuiz } from "@/app/actions";
 
 export const dynamic = "force-dynamic";
 
-export default async function CoursePage({ params }: { params: Promise<{ id: string }> }) {
+export default async function CoursePage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ page?: string }>;
+}) {
   const { id } = await params;
+  const { page } = await searchParams;
   const d = await t();
   const db = getDb();
   const course = db
@@ -24,6 +31,8 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
         exam_minutes: number | null;
         marks_correct: number | null;
         marks_wrong: number | null;
+        paper_count: number | null;
+        paper_size: number | null;
       }
     | undefined;
   if (!course) notFound();
@@ -64,35 +73,57 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
   const myAttempts = isMock && user
     ? (db
         .prepare(
-          "SELECT id, submitted_at, score, total, marks FROM attempts WHERE user_id = ? AND course_id = ? AND submitted_at IS NOT NULL ORDER BY id DESC"
+          "SELECT id, submitted_at, score, total, marks, paper_no FROM attempts WHERE user_id = ? AND course_id = ? AND submitted_at IS NOT NULL ORDER BY id DESC"
         )
-        .all(user.id, course.id) as { id: number; submitted_at: string; score: number; total: number; marks: number | null }[])
+        .all(user.id, course.id) as {
+        id: number;
+        submitted_at: string;
+        score: number;
+        total: number;
+        marks: number | null;
+        paper_no: number | null;
+      }[])
     : [];
 
   if (isMock) {
-    const maxMarks = Math.round(questionCount * (course.marks_correct ?? 1) * 100) / 100;
+    const paperCount = course.paper_count ?? 1;
+    const paperSize = course.paper_size ?? questionCount;
+    const maxMarks = Math.round(paperSize * (course.marks_correct ?? 1) * 100) / 100;
+    const bestByPaper = new Map<number, number>();
+    for (const a of myAttempts) {
+      if (a.paper_no == null) continue;
+      const m = a.marks ?? a.score;
+      if (!bestByPaper.has(a.paper_no) || m > bestByPaper.get(a.paper_no)!) bestByPaper.set(a.paper_no, m);
+    }
+
+    const PAGE_SIZE = 100;
+    const totalPages = Math.ceil(paperCount / PAGE_SIZE);
+    const pageNo = Math.min(Math.max(Number(page) || 1, 1), totalPages);
+    const firstPaper = (pageNo - 1) * PAGE_SIZE + 1;
+    const lastPaper = Math.min(pageNo * PAGE_SIZE, paperCount);
+
     return (
       <div className="max-w-3xl mx-auto">
-        <div className="text-xs font-semibold uppercase tracking-wide text-indigo-600">Mock exam · Real exam simulation</div>
+        <div className="text-xs font-semibold uppercase tracking-wide text-indigo-600">
+          Mock series · Real exam simulation
+        </div>
         <h1 className="mt-1 text-3xl font-extrabold">{course.title}</h1>
         <p className="mt-2 text-slate-600">{course.description}</p>
         <p className="mt-3 text-xs text-slate-500 italic">
-          Learnzy is not affiliated with UPSC. This is a practice simulation; the static-syllabus subject mix is
-          reproduced faithfully, while the real paper also includes current-affairs questions that change every year.
+          Learnzy is not affiliated with UPSC. Papers reproduce the real pattern and static-syllabus subject mix; the
+          real exam also carries current-affairs questions that change every year.
         </p>
 
         <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div className="rounded-2xl bg-white border border-slate-200 p-4 text-center">
-            <div className="text-xl font-extrabold text-slate-800">{questionCount}</div>
-            <div className="text-xs text-slate-500 mt-1">Questions</div>
+            <div className="text-xl font-extrabold text-slate-800">{paperCount}</div>
+            <div className="text-xs text-slate-500 mt-1">Papers in the series</div>
           </div>
           <div className="rounded-2xl bg-white border border-slate-200 p-4 text-center">
-            <div className="text-xl font-extrabold text-slate-800">{course.exam_minutes} min</div>
-            <div className="text-xs text-slate-500 mt-1">Duration</div>
-          </div>
-          <div className="rounded-2xl bg-white border border-slate-200 p-4 text-center">
-            <div className="text-xl font-extrabold text-slate-800">{maxMarks}</div>
-            <div className="text-xs text-slate-500 mt-1">Maximum marks</div>
+            <div className="text-xl font-extrabold text-slate-800">
+              {paperSize} q · {course.exam_minutes} min
+            </div>
+            <div className="text-xs text-slate-500 mt-1">Per paper (real pattern)</div>
           </div>
           <div className="rounded-2xl bg-white border border-slate-200 p-4 text-center">
             <div className="text-xl font-extrabold text-slate-800">
@@ -100,57 +131,127 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
             </div>
             <div className="text-xs text-slate-500 mt-1">Marking (real rules)</div>
           </div>
+          <div className="rounded-2xl bg-white border border-slate-200 p-4 text-center">
+            <div className="text-xl font-extrabold text-slate-800">{questionCount}</div>
+            <div className="text-xs text-slate-500 mt-1">Questions in the bank</div>
+          </div>
         </div>
 
-        <div className="mt-6 rounded-2xl bg-white border border-slate-200 p-6">
-          <h2 className="font-bold text-lg">Sit this mock</h2>
-          <p className="mt-1 text-sm text-slate-600">
-            Exactly like the real exam hall: one continuous timer, a question palette, and negative marking. After
-            submission you get the complete answer paper — every question explained — plus a subject-wise weakness
-            report with study links. Payments are final; each attempt is paid separately.
+        {questionCount < paperSize * 3 ? (
+          <p className="mt-3 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2">
+            Honest note: papers are composed from a verified question bank that is still growing. While the bank is
+            small, different paper numbers will share many questions. New verified questions are added continuously,
+            and papers become more distinct automatically.
           </p>
-          {!user ? (
-            <Link
-              href="/login"
-              className="mt-4 inline-block rounded-xl bg-indigo-600 text-white px-5 py-2.5 font-semibold hover:bg-indigo-700"
-            >
-              Log in to continue
-            </Link>
-          ) : !canPay ? (
-            <div className="mt-4">
-              <p className="text-sm text-amber-700">Before paying, you need a verified phone and an approved ID document.</p>
+        ) : null}
+
+        {!isUnlocked ? (
+          <div className="mt-6 rounded-2xl bg-white border border-indigo-200 p-6">
+            <h2 className="font-bold text-lg">
+              Unlock all {paperCount} papers — ₹{course.price_inr}, one-time
+            </h2>
+            <p className="mt-1 text-sm text-slate-600">
+              One payment opens the entire series: sit any paper, any number of times. Every paper is followed by a
+              complete answer paper (every question explained) and a subject-wise weakness report with book
+              recommendations. Payments are final — no refunds.
+            </p>
+            {!user ? (
               <Link
-                href="/onboarding"
-                className="mt-2 inline-block rounded-xl bg-amber-500 text-white px-5 py-2.5 font-semibold hover:bg-amber-600"
+                href="/login"
+                className="mt-4 inline-block rounded-xl bg-indigo-600 text-white px-5 py-2.5 font-semibold hover:bg-indigo-700"
               >
-                Complete account setup
+                Log in to continue
               </Link>
+            ) : !canPay ? (
+              <div className="mt-4">
+                <p className="text-sm text-amber-700">
+                  Before paying, you need a verified phone and an approved ID document.
+                </p>
+                <Link
+                  href="/onboarding"
+                  className="mt-2 inline-block rounded-xl bg-amber-500 text-white px-5 py-2.5 font-semibold hover:bg-amber-600"
+                >
+                  Complete account setup
+                </Link>
+              </div>
+            ) : (
+              <form action={payForQuiz} className="mt-4">
+                <input type="hidden" name="courseId" value={course.id} />
+                <button className="rounded-xl bg-indigo-600 text-white px-5 py-2.5 font-semibold hover:bg-indigo-700">
+                  Buy the series — ₹{course.price_inr} one-time (Test Mode)
+                </button>
+                <p className="mt-2 text-xs text-slate-500">
+                  Test mode: no real money moves in the pilot. Razorpay checkout replaces this button in the live
+                  version.
+                </p>
+              </form>
+            )}
+          </div>
+        ) : (
+          <div className="mt-6 rounded-2xl bg-white border border-slate-200 p-6">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <h2 className="font-bold text-lg">
+                Your papers <span className="text-sm font-semibold text-emerald-600">(series unlocked)</span>
+              </h2>
+              <span className="text-xs text-slate-500">
+                Papers {firstPaper}–{lastPaper} of {paperCount}
+              </span>
             </div>
-          ) : (
-            <form action={payForQuiz} className="mt-4">
-              <input type="hidden" name="courseId" value={course.id} />
-              <button className="rounded-xl bg-indigo-600 text-white px-5 py-2.5 font-semibold hover:bg-indigo-700">
-                Start mock — ₹{course.price_inr} (Test Mode)
-              </button>
-              <p className="mt-2 text-xs text-slate-500">
-                Test mode: no real money moves in the pilot. Razorpay checkout replaces this button in the live version.
-              </p>
-            </form>
-          )}
-        </div>
+            <p className="mt-1 text-sm text-slate-600">
+              Pick any paper number. Attempted papers show your best marks. Retakes are free and unlimited.
+            </p>
+            <div className="mt-4 grid grid-cols-5 sm:grid-cols-10 gap-1.5">
+              {Array.from({ length: lastPaper - firstPaper + 1 }, (_, i) => firstPaper + i).map((n) => {
+                const best = bestByPaper.get(n);
+                return (
+                  <Link
+                    key={n}
+                    href={`/courses/${course.id}/quiz?paper=${n}`}
+                    className={`h-10 rounded flex flex-col items-center justify-center text-xs font-bold border leading-none gap-0.5 ${
+                      best !== undefined
+                        ? "bg-emerald-500 text-white border-emerald-500"
+                        : "bg-white text-slate-600 border-slate-300 hover:border-indigo-400"
+                    }`}
+                    title={best !== undefined ? `Best: ${best}/${maxMarks}` : `Sit paper ${n}`}
+                  >
+                    <span>{n}</span>
+                    {best !== undefined ? <span className="text-[9px] font-semibold">{best}</span> : null}
+                  </Link>
+                );
+              })}
+            </div>
+            {totalPages > 1 ? (
+              <div className="mt-4 flex flex-wrap gap-1.5">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                  <Link
+                    key={p}
+                    href={`/courses/${course.id}?page=${p}`}
+                    className={`rounded px-2.5 py-1 text-xs font-semibold border ${
+                      p === pageNo
+                        ? "bg-indigo-600 text-white border-indigo-600"
+                        : "border-slate-300 text-slate-600 hover:border-indigo-400"
+                    }`}
+                  >
+                    {(p - 1) * PAGE_SIZE + 1}–{Math.min(p * PAGE_SIZE, paperCount)}
+                  </Link>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        )}
 
         {myAttempts.length > 0 ? (
           <div className="mt-6 rounded-2xl bg-white border border-slate-200 p-6">
-            <h2 className="font-bold text-lg">Your attempts</h2>
+            <h2 className="font-bold text-lg">Your recent attempts</h2>
             <ul className="mt-3 space-y-2">
-              {myAttempts.map((a, i) => (
+              {myAttempts.slice(0, 10).map((a) => (
                 <li key={a.id}>
                   <Link
                     href={`/attempts/${a.id}`}
                     className="flex items-center justify-between rounded-xl border border-slate-200 px-4 py-3 hover:border-indigo-300"
                   >
                     <span className="text-sm font-medium">
-                      Attempt {myAttempts.length - i} · {a.submitted_at} (UTC)
+                      Paper {a.paper_no ?? "—"} · {a.submitted_at} (UTC)
                     </span>
                     <span className="text-sm font-bold text-indigo-700">
                       {a.marks ?? a.score}/{maxMarks} → answer paper

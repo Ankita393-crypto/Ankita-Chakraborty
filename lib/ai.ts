@@ -58,6 +58,54 @@ Rules: exactly 3 lessons, exactly 8 questions, "correct" is the 0-based index of
   return parsed;
 }
 
+export type GeneratedBankQuestion = {
+  q: string;
+  options: string[];
+  correct: number;
+  explanation: string;
+};
+
+// Generates exam-style MCQs to grow a mock series' question bank.
+export async function generateBankQuestions(
+  examTitle: string,
+  subject: string,
+  count: number
+): Promise<GeneratedBankQuestion[]> {
+  const prompt = `You are writing questions for "${examTitle}", an Indian competitive-exam mock test.
+Write ${count} multiple-choice questions on the subject "${subject}" at real UPSC Prelims difficulty.
+Respond with ONLY valid JSON, no markdown fences: {"questions":[{"q":"...","options":["a","b","c","d"],"correct":0,"explanation":"..."}]}
+Rules:
+- Exactly 4 options; "correct" is the 0-based index of the right option.
+- Use ONLY stable, verifiable facts (constitutional articles, historical dates, standard definitions, arithmetic with a checked answer). NO current affairs, NO recent appointments or statistics that change yearly.
+- Mix formats like the real exam: direct questions and "consider the following statements" questions.
+- "explanation" is 1-2 sentences citing the specific fact that makes the answer correct.
+- If you are not fully certain a fact is correct, do not use it.`;
+
+  const res = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: process.env.AI_MODEL || "gpt-4o-mini",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.5,
+      response_format: { type: "json_object" },
+    }),
+  });
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`AI provider error (${res.status}): ${body.slice(0, 200)}`);
+  }
+  const data = await res.json();
+  const content = data.choices?.[0]?.message?.content;
+  if (!content) throw new Error("AI provider returned an empty response");
+  const parsed = JSON.parse(content) as { questions: GeneratedBankQuestion[] };
+  if (!Array.isArray(parsed.questions)) throw new Error("AI response missing questions array");
+  return parsed.questions;
+}
+
 export type GeneratedNotes = { title: string; content: string };
 
 // Generates a UPSC-coursebook-style subject chapter for the weakness report's

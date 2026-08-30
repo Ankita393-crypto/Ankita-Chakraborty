@@ -14,13 +14,25 @@ import { partC } from "./upsc-gs1-part-c";
 // current-affairs weighting, which a static mock cannot reproduce —
 // this is disclosed on the mock's page.)
 export const upscGs1Mock: SeedMock = {
-  slug: "upsc-prelims-gs1-mock-1",
-  title: "UPSC Prelims GS Paper I — Full Mock 1",
+  slug: "upsc-prelims-gs1-mock-series",
+  title: "UPSC Prelims GS Paper I — Mock Series (1000 papers)",
   description:
-    "A full-length simulation of UPSC Civil Services Prelims General Studies Paper I: 100 questions in 2 hours with real negative marking (+2 / −0.67). Complete answer paper with explanations and a subject-wise weakness report after submission.",
-  price_inr: 299,
+    "One payment, one thousand full-length simulations of UPSC Civil Services Prelims GS Paper I: 100 questions in 2 hours with real negative marking (+2 / −0.67). Every paper comes with a complete answer paper — every question explained — and a subject-wise weakness report with book recommendations.",
+  price_inr: 249,
   exam_minutes: 120,
   marks_correct: 2,
   marks_wrong: 2 / 3,
+  paper_count: 1000,
+  paper_size: 100,
+  // Real paper's static-syllabus mix (sums to 100).
+  subject_quota: {
+    "Indian Polity": 18,
+    "History & Culture": 18,
+    Geography: 12,
+    "Indian Economy": 15,
+    "Environment & Ecology": 18,
+    "Science & Technology": 10,
+    "International Relations & Misc": 9,
+  },
   questions: [...partA, ...partB, ...partC],
 };

@@ -9,7 +9,8 @@ import fs from "fs";
 import path from "path";
 import { getDb, audit } from "@/lib/db";
 import { createSession, destroySession, getSessionUser } from "@/lib/auth";
-import { aiAvailable, generateCourse } from "@/lib/ai";
+import { aiAvailable, generateCourse, generateBankQuestions } from "@/lib/ai";
+import { composePaper } from "@/lib/mock";
 
 import { FREE_DAILY_GENERATIONS, EXAM_MINUTES, EXAM_QUESTIONS_PER_ATTEMPT, EXAM_PASS_PERCENT } from "@/lib/config";
 
@@ -143,25 +144,78 @@ export async function payForQuiz(formData: FormData) {
   const courseId = Number(formData.get("courseId"));
   const db = getDb();
   const course = db
-    .prepare("SELECT id, title, price_inr FROM courses WHERE id = ? AND published = 1")
-    .get(courseId) as { id: number; title: string; price_inr: number } | undefined;
+    .prepare("SELECT id, title, price_inr, category FROM courses WHERE id = ? AND published = 1")
+    .get(courseId) as { id: number; title: string; price_inr: number; category: string } | undefined;
   if (!course) redirect("/courses");
   if (!user.phone_verified || user.id_status !== "approved") redirect("/onboarding");
+
+  const isMock = course.category === "mock";
+  if (isMock) {
+    // Mock series is a ONE-TIME purchase: pay once, every paper in the
+    // series is unlocked forever. Repeat purchases are refused.
+    const already = db.prepare("SELECT 1 FROM unlocks WHERE user_id = ? AND course_id = ?").get(user.id, courseId);
+    if (already) redirect(`/courses/${course.id}`);
+  }
 
   // TEST MODE: records a successful payment without moving real money.
   // The production integration replaces this with a Razorpay order +
   // checkout + webhook confirmation.
   db.prepare(
-    "INSERT INTO payments (user_id, course_id, amount_inr, status, mode) VALUES (?, ?, ?, 'paid', 'test')"
-  ).run(user.id, course.id, course.price_inr);
+    `INSERT INTO payments (user_id, course_id, amount_inr, status, mode, consumed) VALUES (?, ?, ?, 'paid', 'test', ?)`
+  ).run(user.id, course.id, course.price_inr, isMock ? 1 : 0);
   audit(user.email, "payment_test", `Test-mode payment of INR ${course.price_inr} for "${course.title}"`);
+
+  if (isMock) {
+    db.prepare("INSERT OR IGNORE INTO unlocks (user_id, course_id) VALUES (?, ?)").run(user.id, course.id);
+    audit(user.email, "mock_series_unlocked", `"${course.title}" unlocked (one-time purchase)`);
+    redirect(`/courses/${course.id}`);
+  }
   redirect(`/courses/${course.id}/quiz`);
 }
 
-export async function startAttempt(courseId: number): Promise<{ attemptId?: number; error?: string }> {
+export async function startAttempt(courseId: number, paperNo?: number): Promise<{ attemptId?: number; error?: string }> {
   const user = await getSessionUser();
   if (!user) return { error: "Please log in first." };
   const db = getDb();
+
+  const course = db.prepare("SELECT category, exam_minutes, paper_count FROM courses WHERE id = ?").get(courseId) as {
+    category: string;
+    exam_minutes: number | null;
+    paper_count: number | null;
+  };
+  const isMock = course.category === "mock";
+
+  if (isMock) {
+    // Mock series: access comes from the one-time purchase (unlock), and a
+    // specific paper number of the series is being sat.
+    const paper = Math.floor(paperNo ?? 0);
+    if (!paper || paper < 1 || paper > (course.paper_count ?? 1)) return { error: "bad_paper" };
+    const unlocked = db.prepare("SELECT 1 FROM unlocks WHERE user_id = ? AND course_id = ?").get(user.id, courseId);
+    if (!unlocked) return { error: "no_payment" };
+
+    const openMock = db
+      .prepare(
+        "SELECT id FROM attempts WHERE user_id = ? AND course_id = ? AND paper_no = ? AND submitted_at IS NULL AND deadline > datetime('now')"
+      )
+      .get(user.id, courseId, paper) as { id: number } | undefined;
+    if (openMock) return { attemptId: openMock.id };
+
+    const payment = db
+      .prepare("SELECT id FROM payments WHERE user_id = ? AND course_id = ? AND status = 'paid' ORDER BY id LIMIT 1")
+      .get(user.id, courseId) as { id: number } | undefined;
+    if (!payment) return { error: "no_payment" };
+
+    const chosen = composePaper(db, courseId, paper);
+    if (chosen.length === 0) return { error: "bad_paper" };
+    const minutes = course.exam_minutes ?? EXAM_MINUTES;
+    const res = db
+      .prepare(
+        `INSERT INTO attempts (user_id, course_id, payment_id, question_ids, deadline, paper_no)
+         VALUES (?, ?, ?, ?, datetime('now', '+${minutes} minutes'), ?)`
+      )
+      .run(user.id, courseId, payment.id, JSON.stringify(chosen), paper);
+    return { attemptId: Number(res.lastInsertRowid) };
+  }
 
   const open = db
     .prepare(
@@ -177,31 +231,17 @@ export async function startAttempt(courseId: number): Promise<{ attemptId?: numb
     .get(user.id, courseId) as { id: number } | undefined;
   if (!payment) return { error: "no_payment" };
 
-  const course = db.prepare("SELECT category, exam_minutes FROM courses WHERE id = ?").get(courseId) as {
-    category: string;
-    exam_minutes: number | null;
-  };
-  const isMock = course.category === "mock";
-
   const questions = db
     .prepare("SELECT id FROM quiz_questions WHERE course_id = ? ORDER BY id")
     .all(courseId) as { id: number }[];
-  // Mock papers present the FULL paper in its set order (like the real exam);
-  // entrance exams draw a random subset from the bank.
-  let chosen: number[];
-  if (isMock) {
-    chosen = questions.map((q) => q.id);
-  } else {
-    const shuffled = questions.map((q) => q.id).sort(() => Math.random() - 0.5);
-    chosen = shuffled.slice(0, Math.min(EXAM_QUESTIONS_PER_ATTEMPT, shuffled.length));
-  }
-  const minutes = isMock && course.exam_minutes ? course.exam_minutes : EXAM_MINUTES;
+  const shuffled = questions.map((q) => q.id).sort(() => Math.random() - 0.5);
+  const chosen = shuffled.slice(0, Math.min(EXAM_QUESTIONS_PER_ATTEMPT, shuffled.length));
 
   db.prepare("UPDATE payments SET consumed = 1 WHERE id = ?").run(payment.id);
   const res = db
     .prepare(
       `INSERT INTO attempts (user_id, course_id, payment_id, question_ids, deadline)
-       VALUES (?, ?, ?, ?, datetime('now', '+${minutes} minutes'))`
+       VALUES (?, ?, ?, ?, datetime('now', '+${EXAM_MINUTES} minutes'))`
     )
     .run(user.id, courseId, payment.id, JSON.stringify(chosen));
   return { attemptId: Number(res.lastInsertRowid) };
@@ -435,6 +475,50 @@ export async function resolveReport(formData: FormData) {
   const status = String(formData.get("status")) === "fixed" ? "fixed" : "dismissed";
   getDb().prepare("UPDATE reports SET status = ? WHERE id = ?").run(status, reportId);
   audit(admin.email, "report_" + status, `Report ${reportId}`);
+  revalidatePath("/admin");
+}
+
+// Grows a mock series' question bank with AI ("generate by permutation and
+// combination": papers are composed from the bank, so a bigger bank means
+// more distinct papers). Admin-only; AI questions are tagged origin='ai'.
+export async function growQuestionBank(formData: FormData) {
+  const admin = await getSessionUser();
+  if (!admin || !admin.is_admin) redirect("/login");
+
+  const courseId = Number(formData.get("courseId"));
+  const subject = String(formData.get("subject") ?? "").trim();
+  const count = Math.min(Math.max(Number(formData.get("count")) || 10, 1), 25);
+  const db = getDb();
+  const course = db.prepare("SELECT id, title FROM courses WHERE id = ? AND category = 'mock'").get(courseId) as
+    | { id: number; title: string }
+    | undefined;
+
+  if (!course || !subject) {
+    revalidatePath("/admin");
+    return;
+  }
+  if (!aiAvailable()) {
+    audit(admin.email, "bank_grow_failed", `No OPENAI_API_KEY configured — cannot generate for "${course.title}"`);
+    revalidatePath("/admin");
+    return;
+  }
+
+  try {
+    const generated = await generateBankQuestions(course.title, subject, count);
+    const insert = db.prepare(
+      "INSERT INTO quiz_questions (course_id, question, options, correct_index, subject, explanation, origin) VALUES (?, ?, ?, ?, ?, ?, 'ai')"
+    );
+    let added = 0;
+    for (const q of generated) {
+      if (!q.q || !Array.isArray(q.options) || q.options.length !== 4) continue;
+      if (typeof q.correct !== "number" || q.correct < 0 || q.correct > 3) continue;
+      insert.run(course.id, q.q, JSON.stringify(q.options), q.correct, subject, q.explanation ?? "");
+      added++;
+    }
+    audit(admin.email, "bank_grown", `${added} AI questions added to "${course.title}" / ${subject} (tagged 'ai' for spot-checking)`);
+  } catch (e) {
+    audit(admin.email, "bank_grow_failed", `"${course.title}" / ${subject}: ${e instanceof Error ? e.message : "unknown error"}`);
+  }
   revalidatePath("/admin");
 }
 

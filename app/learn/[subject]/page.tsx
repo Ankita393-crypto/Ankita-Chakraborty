@@ -4,6 +4,7 @@ import { getDb } from "@/lib/db";
 import { getSessionUser } from "@/lib/auth";
 import { getLang } from "@/lib/i18n";
 import { aiAvailable, generateSubjectNotes } from "@/lib/ai";
+import { booksFor, amazonLink, flipkartLink } from "@/lib/book-links";
 
 export const dynamic = "force-dynamic";
 
@@ -115,6 +116,46 @@ export default async function LearnSubjectPage({ params }: { params: Promise<{ s
               </Link>
             ))}
           </div>
+        </div>
+      ) : null}
+
+      {booksFor(subject).length > 0 ? (
+        <div className="mt-6 rounded-2xl bg-amber-50 border border-amber-200 p-5">
+          <h3 className="font-bold text-amber-900">Prepare {subject} even better — the standard books</h3>
+          <ul className="mt-2 space-y-2">
+            {booksFor(subject).map((b) => (
+              <li
+                key={b.title}
+                className="rounded-xl bg-white border border-slate-200 px-4 py-3 flex items-center justify-between gap-3 flex-wrap"
+              >
+                <div className="text-sm">
+                  <span className="font-semibold">{b.title}</span>
+                  <span className="text-slate-500"> — {b.author}</span>
+                </div>
+                <div className="flex gap-2">
+                  <a
+                    href={amazonLink(b)}
+                    target="_blank"
+                    rel="noopener noreferrer sponsored"
+                    className="rounded-lg bg-slate-900 text-white text-xs font-bold px-3 py-1.5 hover:bg-slate-700"
+                  >
+                    Amazon ↗
+                  </a>
+                  <a
+                    href={flipkartLink(b)}
+                    target="_blank"
+                    rel="noopener noreferrer sponsored"
+                    className="rounded-lg bg-blue-600 text-white text-xs font-bold px-3 py-1.5 hover:bg-blue-700"
+                  >
+                    Flipkart ↗
+                  </a>
+                </div>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-3 text-[11px] text-amber-700">
+            Disclosure: third-party store links; Learnzy may earn an affiliate commission. Prices are set by the store.
+          </p>
         </div>
       ) : null}
     </div>

@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
 import { getDb } from "@/lib/db";
 import { getSessionUser } from "@/lib/auth";
-import { reviewId, resolveReport, togglePublish } from "@/app/actions";
+import { aiAvailable } from "@/lib/ai";
+import { reviewId, resolveReport, togglePublish, growQuestionBank } from "@/app/actions";
 
 export const dynamic = "force-dynamic";
 
@@ -35,6 +36,27 @@ export default async function AdminPage() {
     payments: (db.prepare("SELECT COUNT(*) AS c, COALESCE(SUM(amount_inr),0) AS s FROM payments").get() as { c: number; s: number }),
     certs: (db.prepare("SELECT COUNT(*) AS c FROM certificates").get() as { c: number }).c,
   };
+
+  const mockBanks = (
+    db
+      .prepare("SELECT id, title, paper_size, subject_quota FROM courses WHERE category = 'mock' ORDER BY id")
+      .all() as { id: number; title: string; paper_size: number | null; subject_quota: string | null }[]
+  ).map((m) => {
+    const counts = db
+      .prepare("SELECT origin, COUNT(*) AS c FROM quiz_questions WHERE course_id = ? GROUP BY origin")
+      .all(m.id) as { origin: string; c: number }[];
+    const seedCount = counts.find((r) => r.origin === "seed")?.c ?? 0;
+    const aiCount = counts.find((r) => r.origin === "ai")?.c ?? 0;
+    return {
+      id: m.id,
+      title: m.title,
+      paper_size: m.paper_size ?? 100,
+      bank: seedCount + aiCount,
+      seedCount,
+      aiCount,
+      subjects: Object.keys(m.subject_quota ? JSON.parse(m.subject_quota) : {}),
+    };
+  });
 
   return (
     <div className="space-y-10">
@@ -150,6 +172,51 @@ export default async function AdminPage() {
                 >
                   {c.published ? "Unpublish" : "Publish"}
                 </button>
+              </form>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section>
+        <h2 className="text-lg font-bold">Mock series question banks</h2>
+        <p className="mt-1 text-sm text-slate-500">
+          Papers are composed by combination from these banks — the bigger the bank, the more distinct the 1000
+          papers become. AI-generated questions are tagged <span className="font-mono text-xs">ai</span> for
+          spot-checking; hand-verified seed questions are tagged <span className="font-mono text-xs">seed</span>.
+          {!aiAvailable() ? (
+            <span className="text-amber-700 font-semibold"> AI generation is off: no OPENAI_API_KEY configured.</span>
+          ) : null}
+        </p>
+        <ul className="mt-3 space-y-3">
+          {mockBanks.map((m) => (
+            <li key={m.id} className="rounded-xl bg-white border border-slate-200 p-4">
+              <div className="font-semibold text-sm">{m.title}</div>
+              <div className="mt-1 text-xs text-slate-500">
+                Bank: {m.bank} questions ({m.seedCount} hand-verified, {m.aiCount} AI) · papers of {m.paper_size} ·
+                subjects: {m.subjects.join(", ")}
+              </div>
+              <form action={growQuestionBank} className="mt-3 flex flex-wrap items-center gap-2">
+                <input type="hidden" name="courseId" value={m.id} />
+                <select name="subject" className="rounded-lg border border-slate-300 px-2 py-1.5 text-sm">
+                  {m.subjects.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  name="count"
+                  type="number"
+                  min={1}
+                  max={25}
+                  defaultValue={10}
+                  className="w-20 rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
+                />
+                <button className="rounded-lg bg-indigo-600 text-white px-3 py-1.5 text-sm font-semibold hover:bg-indigo-700 disabled:opacity-50">
+                  Generate with AI
+                </button>
+                <span className="text-xs text-slate-400">Outcome appears in the audit log below.</span>
               </form>
             </li>
           ))}

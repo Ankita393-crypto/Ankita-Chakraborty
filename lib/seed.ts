@@ -2,6 +2,7 @@ import type { Database } from "better-sqlite3";
 import bcrypt from "bcryptjs";
 import type { SeedCourse, SeedMock } from "./seed-types";
 import { upscGs1Mock } from "./seed-mocks/upsc-gs1";
+import { upscCsatMock } from "./seed-mocks/upsc-csat";
 import { class10Maths } from "./seed-courses/maths";
 import { oceanography } from "./seed-courses/oceanography";
 import { awsCloudPractitioner } from "./seed-courses/aws";
@@ -44,16 +45,27 @@ export function seed(db: Database) {
     c.questions.forEach((qq) => insertQuestion.run(courseId, qq.q, JSON.stringify(qq.options), qq.correct));
   }
 
-  const mocks: SeedMock[] = [upscGs1Mock];
+  const mocks: SeedMock[] = [upscGs1Mock, upscCsatMock];
   const insertMock = db.prepare(
-    `INSERT INTO courses (slug, title, description, category, tier, price_inr, exam_minutes, marks_correct, marks_wrong, created_by)
-     VALUES (?, ?, ?, 'mock', 5, ?, ?, ?, ?, 'seed')`
+    `INSERT INTO courses (slug, title, description, category, tier, price_inr, exam_minutes, marks_correct, marks_wrong, paper_count, paper_size, subject_quota, created_by)
+     VALUES (?, ?, ?, 'mock', 5, ?, ?, ?, ?, ?, ?, ?, 'seed')`
   );
   const insertMockQ = db.prepare(
-    "INSERT INTO quiz_questions (course_id, question, options, correct_index, subject, explanation) VALUES (?, ?, ?, ?, ?, ?)"
+    "INSERT INTO quiz_questions (course_id, question, options, correct_index, subject, explanation, origin) VALUES (?, ?, ?, ?, ?, ?, 'seed')"
   );
   for (const m of mocks) {
-    const res = insertMock.run(m.slug, m.title, m.description, m.price_inr, m.exam_minutes, m.marks_correct, m.marks_wrong);
+    const res = insertMock.run(
+      m.slug,
+      m.title,
+      m.description,
+      m.price_inr,
+      m.exam_minutes,
+      m.marks_correct,
+      m.marks_wrong,
+      m.paper_count,
+      m.paper_size,
+      JSON.stringify(m.subject_quota)
+    );
     const mockId = Number(res.lastInsertRowid);
     m.questions.forEach((qq) =>
       insertMockQ.run(mockId, qq.q, JSON.stringify(qq.options), qq.correct, qq.subject, qq.explanation)

@@ -7,39 +7,61 @@ import { QuizRunner } from "./runner";
 
 export const dynamic = "force-dynamic";
 
-export default async function QuizPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function QuizPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ paper?: string }>;
+}) {
   const { id } = await params;
+  const { paper } = await searchParams;
   const courseId = Number(id);
   const user = await getSessionUser();
   if (!user) redirect("/login");
 
   const db = getDb();
   const course = db
-    .prepare("SELECT id, title, category, marks_correct, marks_wrong FROM courses WHERE id = ? AND published = 1")
+    .prepare("SELECT id, title, category, marks_correct, marks_wrong, paper_count FROM courses WHERE id = ? AND published = 1")
     .get(courseId) as
-    | { id: number; title: string; category: string; marks_correct: number | null; marks_wrong: number | null }
+    | {
+        id: number;
+        title: string;
+        category: string;
+        marks_correct: number | null;
+        marks_wrong: number | null;
+        paper_count: number | null;
+      }
     | undefined;
   if (!course) notFound();
   const isMock = course.category === "mock";
 
-  if (!isMock) {
+  let paperNo: number | undefined;
+  if (isMock) {
+    paperNo = Number(paper);
+    if (!Number.isInteger(paperNo) || paperNo < 1 || paperNo > (course.paper_count ?? 1)) {
+      redirect(`/courses/${courseId}`);
+    }
+  } else {
     const already = db.prepare("SELECT 1 FROM unlocks WHERE user_id = ? AND course_id = ?").get(user.id, courseId);
     if (already) redirect(`/courses/${courseId}`);
   }
 
-  const res = await startAttempt(courseId);
+  const res = await startAttempt(courseId, paperNo);
   if (res.error === "no_payment") {
     return (
       <div className="max-w-xl mx-auto rounded-2xl bg-white border border-slate-200 p-8 text-center">
-        <h1 className="text-xl font-bold">No exam attempt available</h1>
+        <h1 className="text-xl font-bold">{isMock ? "Series not purchased yet" : "No exam attempt available"}</h1>
         <p className="mt-2 text-sm text-slate-600">
-          You need to pay for an entrance exam attempt first (payments are final; each attempt is paid separately).
+          {isMock
+            ? "One payment unlocks every paper in this mock series. Buy the series first, then sit any paper."
+            : "You need to pay for an entrance exam attempt first (payments are final; each attempt is paid separately)."}
         </p>
         <Link
           href={`/courses/${courseId}`}
           className="mt-4 inline-block rounded-xl bg-indigo-600 text-white px-5 py-2.5 font-semibold"
         >
-          Back to course
+          {isMock ? "Go to the series page" : "Back to course"}
         </Link>
       </div>
     );
@@ -71,7 +93,7 @@ export default async function QuizPage({ params }: { params: Promise<{ id: strin
     <QuizRunner
       attemptId={res.attemptId}
       courseId={courseId}
-      courseTitle={course.title}
+      courseTitle={isMock ? `${course.title} — Paper ${paperNo}` : course.title}
       questions={questions}
       secondsLeft={secondsLeft}
       isMock={isMock}

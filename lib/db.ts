@@ -62,6 +62,9 @@ function migrate(db: Database.Database) {
     exam_minutes INTEGER,       -- paper duration, e.g. 120 for UPSC GS Paper I
     marks_correct REAL,         -- marks awarded per correct answer
     marks_wrong REAL,           -- marks DEDUCTED per wrong answer (negative marking)
+    paper_count INTEGER,        -- number of papers in the mock series (bunch), e.g. 1000
+    paper_size INTEGER,         -- questions per paper, e.g. 100 (GS) / 80 (CSAT)
+    subject_quota TEXT,         -- JSON {subject: questions-per-paper} mirroring the real mix
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
 
@@ -82,7 +85,8 @@ function migrate(db: Database.Database) {
     options TEXT NOT NULL, -- JSON array of 4 strings
     correct_index INTEGER NOT NULL,
     subject TEXT,          -- e.g. 'Indian Polity' — powers the weakness report
-    explanation TEXT       -- shown in the answer paper after submission
+    explanation TEXT,      -- shown in the answer paper after submission
+    origin TEXT NOT NULL DEFAULT 'seed' -- seed (hand-verified) | ai (generated, spot-check)
   );
 
   CREATE TABLE IF NOT EXISTS payments (
@@ -109,7 +113,8 @@ function migrate(db: Database.Database) {
     total INTEGER,
     passed INTEGER,
     answers TEXT,          -- JSON map of question id -> chosen option index
-    marks REAL             -- final marks after negative marking (mock exams)
+    marks REAL,            -- final marks after negative marking (mock exams)
+    paper_no INTEGER       -- which paper of the mock series (1-based), NULL for entrance exams
   );
 
   CREATE TABLE IF NOT EXISTS unlocks (

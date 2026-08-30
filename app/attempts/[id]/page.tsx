@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getDb } from "@/lib/db";
 import { getSessionUser } from "@/lib/auth";
+import { booksFor, amazonLink, flipkartLink } from "@/lib/book-links";
 
 export const dynamic = "force-dynamic";
 
@@ -184,6 +185,64 @@ export default async function AnswerPaperPage({ params }: { params: Promise<{ id
           </p>
         )}
       </div>
+
+      {/* Book recommendations for weak subjects (affiliate links) */}
+      {weakSubjects.some((r) => booksFor(r.subject).length > 0) ? (
+        <div className="mt-6 rounded-2xl bg-amber-50 border border-amber-200 p-6">
+          <h2 className="font-bold text-lg text-amber-900">Recommended books for your weak subjects</h2>
+          <p className="mt-1 text-sm text-amber-800">
+            The standard books toppers use, for exactly the subjects you lost marks in. Buy on the store you prefer.
+          </p>
+          <div className="mt-4 space-y-4">
+            {weakSubjects.map((r) => {
+              const books = booksFor(r.subject);
+              if (books.length === 0) return null;
+              return (
+                <div key={r.subject}>
+                  <h3 className="text-sm font-bold text-slate-700">
+                    {r.subject} <span className="font-normal text-slate-500">({r.accuracy}% accuracy)</span>
+                  </h3>
+                  <ul className="mt-2 space-y-2">
+                    {books.map((b) => (
+                      <li
+                        key={b.title}
+                        className="rounded-xl bg-white border border-slate-200 px-4 py-3 flex items-center justify-between gap-3 flex-wrap"
+                      >
+                        <div className="text-sm">
+                          <span className="font-semibold">{b.title}</span>
+                          <span className="text-slate-500"> — {b.author}</span>
+                        </div>
+                        <div className="flex gap-2">
+                          <a
+                            href={amazonLink(b)}
+                            target="_blank"
+                            rel="noopener noreferrer sponsored"
+                            className="rounded-lg bg-slate-900 text-white text-xs font-bold px-3 py-1.5 hover:bg-slate-700"
+                          >
+                            Amazon ↗
+                          </a>
+                          <a
+                            href={flipkartLink(b)}
+                            target="_blank"
+                            rel="noopener noreferrer sponsored"
+                            className="rounded-lg bg-blue-600 text-white text-xs font-bold px-3 py-1.5 hover:bg-blue-700"
+                          >
+                            Flipkart ↗
+                          </a>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })}
+          </div>
+          <p className="mt-3 text-[11px] text-amber-700">
+            Disclosure: these are links to third-party stores; Learnzy may earn an affiliate commission on purchases.
+            Prices and availability are set by the store, not by us.
+          </p>
+        </div>
+      ) : null}
 
       {/* Full solutions */}
       <h2 className="mt-10 font-bold text-lg">Solutions — every question explained</h2>
