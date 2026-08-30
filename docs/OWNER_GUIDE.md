@@ -113,6 +113,54 @@ These must be in your name — they involve your identity, your bank, and your m
 
 ---
 
+## 5A. Getting the keys, step by step (fresher edition)
+
+**What an "API key" actually is.** When Learnzy needs another company's service (OpenAI's brain, Amazon's commission tracking), it calls that company's computers over the internet. The API key is like a SIM card: it identifies *your* account so the usage — and the bill or the commission — lands on you. That's the whole mystery. A key is just a long password string you copy from their website and paste into one settings file.
+
+**Where keys go.** The project has a template file called `.env.example`. Make a copy named `.env.local`, fill in the values, restart the site — done. The code already knows the names (`OPENAI_API_KEY`, `AMAZON_AFFILIATE_TAG`, `FLIPKART_AFFILIATE_ID`); features switch on automatically when a value appears. `.env.local` never leaves your computer (it is deliberately excluded from GitHub). On a hosting service like Render, you don't upload the file — you type the same names/values into its **Environment Variables** page.
+
+### A. OpenAI key (unlocks AI courses, study chapters, question-bank growth)
+
+1. Go to **platform.openai.com** (this is the developer site — different from chatgpt.com) and create an account with your email or Google.
+2. Open **Settings → Billing** and add credits. It's prepaid, minimum $5 (~₹450): you load money first, usage draws it down, and it can never charge more than you loaded. An international-enabled debit/credit card is needed.
+3. Open **API keys → "Create new secret key"**. Name it "learnzy". The key (starts with `sk-`) is shown **only once** — copy it immediately into `.env.local` as `OPENAI_API_KEY=sk-...`.
+4. Restart the site. The admin page's "Generate with AI" buttons, the `/learn` study chapters, and AI course generation all come alive.
+
+*Cost sense:* the default model (gpt-4o-mini) costs fractions of a paisa per question generated. Your $5 will last the whole pilot. If a key ever leaks, log in and delete it — that kills it instantly, and you make a new one.
+
+### B. Amazon Associates (commission on book links)
+
+1. Amazon requires a **live, public website** to approve you — so this comes *after* hosting, not before.
+2. Go to **affiliate-program.amazon.in** and sign in with any Amazon account. Fill the application: your website address, what it's about (exam preparation), how you bring visitors.
+3. You receive a **tracking ID** (also called a Store ID), e.g. `learnzy-21`. Put it in `.env.local` as `AMAZON_AFFILIATE_TAG=learnzy-21`. Every book button on the site starts carrying your commission tag automatically.
+4. **The 180-day rule:** Amazon closes accounts that don't produce **3 qualifying sales within 180 days**. You can reapply, but the cleanest path is to apply once real learners are on the site.
+5. Payouts go to your bank account after a minimum threshold; commission on books is a few percent of the sale.
+
+### C. Flipkart (commission on the other book button)
+
+Honest status: Flipkart has kept **direct** affiliate registration paused for new individuals for years. Two routes:
+
+- **If you ever get a direct Flipkart affiliate account:** put its ID in `FLIPKART_AFFILIATE_ID=` and you're done — the buttons already support it.
+- **The realistic route:** free "aggregator" networks — **Cuelinks** (cuelinks.com) or **EarnKaro** (earnkaro.com) — have standing partnerships with Flipkart. You sign up (KYC = PAN + bank details), and they give you converted links or a small website script that turns ordinary Flipkart links into commission-earning ones. They take a cut of the commission, and pay out to your bank from as little as ₹10. When you choose one, the agent wires its link format in — a small change.
+
+Until either exists, the Flipkart buttons still work perfectly as plain links; you just don't earn on them yet. The Amazon button is the one to prioritise.
+
+### D. Razorpay (real ₹249 payments — replaces Test Mode)
+
+1. Go to **razorpay.com → Sign Up**. Choose **Individual / Sole proprietorship** — no registered company needed.
+2. KYC: your **PAN**, **bank account number + IFSC**, and address proof. Approval typically takes a few days.
+3. From the Razorpay dashboard you get **two** keys: a **Key ID** (public) and a **Key Secret** (private). When you have them, the agent replaces the Test-Mode button with real Razorpay checkout (UPI + cards) — this is a code change on our side, already planned in the requirements.
+4. Cost: free to open; Razorpay keeps ~2% of each payment. Money settles to your bank account automatically (T+2 days by default).
+
+### The sensible order
+
+1. **Now:** OpenAI key — it works even on your local test site and unlocks the biggest features.
+2. **Next:** hosting + domain, so the site has a public address.
+3. **Then:** Amazon Associates (needs the live site) and Razorpay KYC (takes days — start early).
+4. **Whenever:** Cuelinks/EarnKaro for Flipkart earnings.
+
+---
+
 ## 6. What is deliberately NOT in the pilot
 
 So you're never surprised: Google sign-in (needs your OAuth account), real payments and refunds-free checkout text on a real gateway, real SMS, AI generation (needs your key), YouTube video embeds (needs your channel's videos), the premium subscription tier (price deliberately deferred), and automated ID verification (you decided manual review). All of these are in the requirements document and slot in as the accounts above get created.
