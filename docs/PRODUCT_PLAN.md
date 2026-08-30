@@ -26,7 +26,7 @@ The guiding principle: **learning content is free; the platform earns from the m
 
 Eligibility to register: a valid **email address**, a **mandatory phone number**, and a **mandatory identity document upload** (any one of: PAN, Aadhaar, driving license, student ID, or employee ID). Rationale (owner's decision): ensures accountability and that certificates map to real, identifiable people.
 
-### 2.1 Launch target audience (recommendation based on the current Indian market, awaiting owner confirmation)
+### 2.1 Launch target audience (confirmed by the owner — pilot launches with government-exam topics)
 
 - **Primary: government-exam aspirants, roughly ages 18–30** (SSC, banking, railways, state exams). This is India's largest, most persistent paid-learning segment; buyers are accustomed to paying small amounts (₹250–₹1,500) for test prep; and Hindi/Bengali-medium aspirants are underserved by premium English-first platforms — which makes Learnzy's tri-language content a genuine differentiator rather than a nice-to-have.
 - **Secondary: college students and early-career professionals upskilling in Gen AI and AWS.** Fast-growing demand, willingness to pay for certification prep, and low content-production cost for us.
@@ -188,7 +188,8 @@ Item numbering is stable — the requirements document cross-references these as
 | 11 | Exam format | **Decided** | Entrance-exam framing (not "quiz"): 15 basic-knowledge questions from a 20+ bank, 20 minutes, 60% pass, retry at full price, time-bound without proctoring. |
 | 12 | Content depth & truthfulness | **Decided** | Market-level chapters only; no false or assumed information — unverifiable facts are omitted or escalated to the owner (Section 4.3). |
 | 13 | Certificate delivery | **Decided** | Certificates download as generated **PDF files** directly; ID verification always precedes payment, so every certificate holder is document-verified by construction. |
-| 14 | Launch target audience | **Recommended — awaiting owner confirmation** | Primary: government-exam aspirants 18–30 (Hindi/Bengali-medium underserved); secondary: Gen AI / AWS upskillers (Section 2.1). |
+| 14 | Launch target audience | **Decided** | Owner confirmed: pilot launches with government-exam topics. Primary: government-exam aspirants 18–30 (Hindi/Bengali-medium underserved); secondary: Gen AI / AWS upskillers (Section 2.1). |
+| 15 | Government-exam knowledge base | **Decided** | Verified-only exam directory (`lib/exam-directory.ts`, public `/exams` page): conducting bodies, official sites, and patterns cross-checked against current notifications (Aug 2026); patterns re-verified each cycle. Full subject coverage seeded: General Awareness, Quantitative Aptitude, Reasoning, English. |
 
 ---
 

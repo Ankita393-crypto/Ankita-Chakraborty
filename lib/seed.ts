@@ -5,8 +5,19 @@ import { class10Maths } from "./seed-courses/maths";
 import { oceanography } from "./seed-courses/oceanography";
 import { awsCloudPractitioner } from "./seed-courses/aws";
 import { sscGeneralAwareness } from "./seed-courses/ssc";
+import { quantitativeAptitude } from "./seed-courses/quant";
+import { reasoningGovtExams } from "./seed-courses/reasoning";
+import { englishGovtExams } from "./seed-courses/english";
 
-const courses: SeedCourse[] = [class10Maths, oceanography, awsCloudPractitioner, sscGeneralAwareness];
+const courses: SeedCourse[] = [
+  class10Maths,
+  oceanography,
+  awsCloudPractitioner,
+  sscGeneralAwareness,
+  quantitativeAptitude,
+  reasoningGovtExams,
+  englishGovtExams,
+];
 
 export function seed(db: Database) {
   const adminEmail = "admin@learnzy.test";

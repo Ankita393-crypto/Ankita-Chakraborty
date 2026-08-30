@@ -30,6 +30,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <Link href="/courses" className="text-sm font-medium text-slate-600 hover:text-indigo-700">
               {d.courses}
             </Link>
+            <Link href="/exams" className="text-sm font-medium text-slate-600 hover:text-indigo-700">
+              {d.govExams}
+            </Link>
             <Link href="/verify" className="text-sm font-medium text-slate-600 hover:text-indigo-700">
               {d.verifyCert}
             </Link>
