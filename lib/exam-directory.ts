@@ -17,7 +17,7 @@ export type ExamEntry = {
   eligibility: string;
   stages: string;
   pattern: string[]; // verified pattern facts for the first/screening stage
-  subjects: string[]; // course slugs on Learnzy that prepare for it
+  subjects: string[]; // course slugs on Bodhi that prepare for it
   verifiedOn: string;
 };
 

@@ -21,18 +21,18 @@ import { seed } from "./seed";
 type GlobalMongo = {
   dbPromise?: Promise<Db>;
 };
-const g = globalThis as unknown as { __learnzyMongo?: GlobalMongo };
-if (!g.__learnzyMongo) g.__learnzyMongo = {};
+const g = globalThis as unknown as { __bodhiMongo?: GlobalMongo };
+if (!g.__bodhiMongo) g.__bodhiMongo = {};
 
 export async function getDb(): Promise<Db> {
-  if (!g.__learnzyMongo!.dbPromise) {
-    g.__learnzyMongo!.dbPromise = init().catch((e) => {
+  if (!g.__bodhiMongo!.dbPromise) {
+    g.__bodhiMongo!.dbPromise = init().catch((e) => {
       // A failed startup must not poison the cache forever.
-      g.__learnzyMongo!.dbPromise = undefined;
+      g.__bodhiMongo!.dbPromise = undefined;
       throw e;
     });
   }
-  return g.__learnzyMongo!.dbPromise;
+  return g.__bodhiMongo!.dbPromise;
 }
 
 async function init(): Promise<Db> {
@@ -48,7 +48,7 @@ async function init(): Promise<Db> {
   }
   const client = new MongoClient(uri);
   await client.connect();
-  const db = client.db(process.env.MONGODB_DB || "learnzy");
+  const db = client.db(process.env.MONGODB_DB || "bodhi");
   await ensureIndexes(db);
   if ((await db.collection("courses").countDocuments()) === 0) {
     await seed(db);

@@ -1,4 +1,4 @@
-# Requirements Document — Learnzy
+# Requirements Document — Bodhi
 
 **Document status:** Draft v4 for review
 **Derived from:** `docs/PRODUCT_PLAN.md`
@@ -117,11 +117,11 @@ Requirement priority uses MoSCoW: **M** = Must have (MVP), **S** = Should have, 
 | AI video tooling + YouTube channel | FR-16 | Channel must exist before any video embedding; monetization much later |
 | Payment gateway onboarding (e.g., Razorpay) | FR-20 | Individual/sole-proprietor onboarding with owner's PAN + bank account (no registered entity yet — decided path [OQ-9]); USD deferred |
 | SMS OTP provider | FR-4 | Per-SMS cost in India |
-| Domain + hosting | Everything | Name decided: **Learnzy** [OQ-1]; domain/trademark availability check still required before launch |
+| Domain + hosting | Everything | Name decided: **Bodhi** [OQ-1]; domain/trademark availability check still required before launch |
 | Privacy Policy / ToS drafts | NFR-3 | Launch blocker |
 
 ## 6. Traceability of Open Decisions
 
 All **[OQ-n]** references point to Section 12 (Decisions Log & Open Questions) of `docs/PRODUCT_PLAN.md`, which records each item's status — decided or still open. No requirement with an open item will be implemented on an assumed answer; where a placeholder is unavoidable (e.g., re-attempt pricing), it is built as **admin-configurable** so the decision can be applied without code changes.
 
-**Still open after the latest owner review:** only the premium tier price and free-tier daily cap [OQ-7], deliberately deferred by the owner to Phase 2 (both built admin-configurable). Operational prerequisites that remain are tasks, not decisions: domain/trademark check for "Learnzy", payment gateway individual onboarding, YouTube channel creation, and Privacy Policy / Terms of Service drafting.
+**Still open after the latest owner review:** only the premium tier price and free-tier daily cap [OQ-7], deliberately deferred by the owner to Phase 2 (both built admin-configurable). Operational prerequisites that remain are tasks, not decisions: domain/trademark check for "Bodhi", payment gateway individual onboarding, YouTube channel creation, and Privacy Policy / Terms of Service drafting.

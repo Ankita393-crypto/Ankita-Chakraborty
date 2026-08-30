@@ -4,7 +4,7 @@ import type { SeedMock } from "../seed-types";
 // Real pattern (stable for years): 80 questions, 200 marks (2.5 each),
 // 2 hours, one-third negative marking (−0.833 per wrong), QUALIFYING at 33%.
 // Comprehension answers here depend ONLY on the passage text (CSAT style);
-// passages are original Learnzy text, so there is no copyright issue.
+// passages are original Bodhi text, so there is no copyright issue.
 
 const COMP = "Comprehension";
 const REAS = "Logical Reasoning & Analytical Ability";

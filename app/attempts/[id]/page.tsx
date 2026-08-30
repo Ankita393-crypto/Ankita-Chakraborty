@@ -232,7 +232,7 @@ export default async function AnswerPaperPage({ params }: { params: Promise<{ id
             })}
           </div>
           <p className="mt-3 text-[11px] text-amber-700">
-            Disclosure: these are links to third-party stores; Learnzy may earn an affiliate commission on purchases.
+            Disclosure: these are links to third-party stores; Bodhi may earn an affiliate commission on purchases.
             Prices and availability are set by the store, not by us.
           </p>
         </div>

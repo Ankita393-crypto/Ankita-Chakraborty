@@ -23,13 +23,13 @@ const courses: SeedCourse[] = [
 ];
 
 export async function seed(db: Db) {
-  const adminEmail = "admin@learnzy.test";
+  const adminEmail = "admin@bodhi.test";
   const adminPass = process.env.ADMIN_PASSWORD || "admin123";
   await db.collection("users").insertOne({
     id: await nextId(db, "users"),
     email: adminEmail,
     password_hash: bcrypt.hashSync(adminPass, 10),
-    name: "Learnzy Admin",
+    name: "Bodhi Admin",
     phone: "+910000000000",
     phone_verified: 1,
     language: "en",

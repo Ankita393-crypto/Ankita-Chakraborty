@@ -9,7 +9,7 @@ export default function LoginPage() {
 
   return (
     <div className="max-w-md mx-auto rounded-2xl bg-white border border-slate-200 p-8">
-      <h1 className="text-2xl font-extrabold">Log in to Learnzy</h1>
+      <h1 className="text-2xl font-extrabold">Log in to Bodhi</h1>
       <form action={action} className="mt-6 space-y-4">
         <label className="block">
           <span className="text-sm font-medium">Email</span>

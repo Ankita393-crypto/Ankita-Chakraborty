@@ -109,7 +109,7 @@ export default async function LearnSubjectPage({ params }: { params: Promise<{ s
 
       {related.length > 0 ? (
         <div className="mt-8 rounded-2xl bg-indigo-50 border border-indigo-200 p-5">
-          <h3 className="font-bold text-indigo-900">Verified Learnzy courses covering {subject}</h3>
+          <h3 className="font-bold text-indigo-900">Verified Bodhi courses covering {subject}</h3>
           <div className="mt-2 flex flex-wrap gap-2">
             {related.map((c) => (
               <Link
@@ -159,7 +159,7 @@ export default async function LearnSubjectPage({ params }: { params: Promise<{ s
             ))}
           </ul>
           <p className="mt-3 text-[11px] text-amber-700">
-            Disclosure: third-party store links; Learnzy may earn an affiliate commission. Prices are set by the store.
+            Disclosure: third-party store links; Bodhi may earn an affiliate commission. Prices are set by the store.
           </p>
         </div>
       ) : null}

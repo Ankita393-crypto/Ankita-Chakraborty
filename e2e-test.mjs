@@ -16,7 +16,7 @@ const mongoPort = execSync("ps -eo args | grep -o 'mongod-x64[^ ]* --port [0-9]*
   .trim();
 const mongo = new MongoClient(`mongodb://127.0.0.1:${mongoPort}`);
 await mongo.connect();
-const mdb = mongo.db("learnzy");
+const mdb = mongo.db("bodhi");
 
 const results = [];
 const ok = (s, d = "") => {
@@ -79,7 +79,7 @@ try {
 
   // 3. Admin approves + admin page renders
   await logout();
-  await login("admin@learnzy.test", "admin123");
+  await login("admin@bodhi.test", "admin123");
   await page.goto(`${BASE}/admin`);
   await page.waitForSelector(`text=${EMAIL}`);
   // Approve the row for OUR tester (the pending-queue li containing our email).

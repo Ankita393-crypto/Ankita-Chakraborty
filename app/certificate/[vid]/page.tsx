@@ -37,7 +37,7 @@ export default async function CertificatePage({ params }: { params: Promise<{ vi
         <PrintButton />
       </div>
       <div className="mx-auto max-w-3xl bg-white border-8 border-double border-indigo-700 p-12 text-center print:border-4">
-        <div className="text-3xl font-extrabold tracking-tight text-indigo-700">Learnzy</div>
+        <div className="text-3xl font-extrabold tracking-tight text-indigo-700">Bodhi</div>
         <div className="mt-1 text-xs uppercase tracking-widest text-slate-500">
           {cert.kind === "quiz" ? "Certificate of Entrance Exam Achievement" : "Certificate of Course Completion"}
         </div>
@@ -52,10 +52,10 @@ export default async function CertificatePage({ params }: { params: Promise<{ vi
           <div>
             Verification ID: <span className="font-mono font-bold">{cert.verification_id}</span>
             <br />
-            Verify at learnzy — /verify
+            Verify at bodhi — /verify
           </div>
           <div className="text-right">
-            Learnzy
+            Bodhi
             <br />
             AI-powered learning platform
           </div>

@@ -37,7 +37,7 @@ export default async function VerifyPage({
     <div className="max-w-xl mx-auto">
       <h1 className="text-2xl font-extrabold">Verify a certificate</h1>
       <p className="mt-1 text-sm text-slate-600">
-        Employers and institutions can confirm any Learnzy certificate here using its verification ID.
+        Employers and institutions can confirm any Bodhi certificate here using its verification ID.
       </p>
       <form className="mt-5 flex gap-2">
         <input

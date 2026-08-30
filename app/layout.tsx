@@ -6,7 +6,7 @@ import { getLang, t } from "@/lib/i18n";
 import { setLanguage, logout } from "@/app/actions";
 
 export const metadata: Metadata = {
-  title: "Learnzy — Learn anything, prove it, for free",
+  title: "Bodhi — Learn anything, prove it, for free",
   description:
     "AI-powered lessons on every subject. Pass an entrance exam to unlock any course free and earn downloadable certificates.",
 };
@@ -25,7 +25,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
           <nav className="mx-auto max-w-5xl flex items-center gap-4 px-4 py-3">
             <Link href="/" className="text-xl font-extrabold tracking-tight text-indigo-700">
-              Learnzy
+              Bodhi
             </Link>
             <Link href="/courses" className="text-sm font-medium text-slate-600 hover:text-indigo-700">
               {d.courses}
@@ -87,7 +87,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         </header>
         <main className="mx-auto max-w-5xl px-4 py-8">{children}</main>
         <footer className="mx-auto max-w-5xl px-4 py-8 text-xs text-slate-400 border-t border-slate-200 mt-12">
-          Learnzy pilot · AI-generated content — verify independently before professional or medical use · Learnzy
+          Bodhi pilot · AI-generated content — verify independently before professional or medical use · Bodhi
           prepares you for external certifications; it does not award them.
         </footer>
       </body>

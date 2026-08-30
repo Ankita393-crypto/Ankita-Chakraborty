@@ -1,4 +1,4 @@
-# Product Plan — Learnzy
+# Product Plan — Bodhi
 
 **Document status:** Draft v4 for review
 **Author:** Prepared with/for the product owner (Business Analyst)
@@ -28,9 +28,9 @@ Eligibility to register: a valid **email address**, a **mandatory phone number**
 
 ### 2.1 Launch target audience (confirmed by the owner — pilot launches with government-exam topics)
 
-- **Primary: government-exam aspirants, roughly ages 18–30** (SSC, banking, railways, state exams). This is India's largest, most persistent paid-learning segment; buyers are accustomed to paying small amounts (₹250–₹1,500) for test prep; and Hindi/Bengali-medium aspirants are underserved by premium English-first platforms — which makes Learnzy's tri-language content a genuine differentiator rather than a nice-to-have.
+- **Primary: government-exam aspirants, roughly ages 18–30** (SSC, banking, railways, state exams). This is India's largest, most persistent paid-learning segment; buyers are accustomed to paying small amounts (₹250–₹1,500) for test prep; and Hindi/Bengali-medium aspirants are underserved by premium English-first platforms — which makes Bodhi's tri-language content a genuine differentiator rather than a nice-to-have.
 - **Secondary: college students and early-career professionals upskilling in Gen AI and AWS.** Fast-growing demand, willingness to pay for certification prep, and low content-production cost for us.
-- **Deliberately not targeted at launch:** K-12 school students as a *marketing* segment (school courses stay in the catalog, but selling to minors requires parental payment decisions and heavy competition against entrenched brands) and NEET/JEE coaching (dominated by large incumbents with massive brand trust; revisit once Learnzy has credibility). The general "learn anything" catalog remains open to everyone — targeting governs where marketing money and seed content go first, not who may sign up.
+- **Deliberately not targeted at launch:** K-12 school students as a *marketing* segment (school courses stay in the catalog, but selling to minors requires parental payment decisions and heavy competition against entrenched brands) and NEET/JEE coaching (dominated by large incumbents with massive brand trust; revisit once Bodhi has credibility). The general "learn anything" catalog remains open to everyone — targeting governs where marketing money and seed content go first, not who may sign up.
 
 ## 3. Core Learner Journey (Owner-confirmed "Option B" flow)
 
@@ -175,7 +175,7 @@ Item numbering is stable — the requirements document cross-references these as
 
 | # | Topic | Status | Decision / What's still needed |
 |---|---|---|---|
-| 1 | Product name and domain | **Decided** | **Learnzy** (owner's pick — catchy for both children and adults). Domain and trademark availability still must be verified before public launch; if unavailable, fallbacks are GyanGo and CurioLearn. |
+| 1 | Product name and domain | **Decided** | **Bodhi** (owner's pick — catchy for both children and adults). Domain and trademark availability still must be verified before public launch; if unavailable, fallbacks are GyanGo and CurioLearn. |
 | 2 | Quiz pricing | **Decided** | Tiered by level within ₹249–₹2,499, grounded in August 2026 market research — see Section 6.1 for the nine-tier table (school ₹249 … PMP ₹2,499). **Failed re-attempts are charged the same full price.** All tier prices admin-configurable. |
 | 3 | Certificates | **Decided** | Certificates at **both** points, both downloadable PDFs. The quiz certificate is covered by the paid quiz fee; the course-completion certificate (the website's own certificate) is **free**. |
 | 4 | Quiz integrity | **Decided** | **Time-bound, not proctored.** Timed quizzes with randomized question subsets; no webcam proctoring or invasive monitoring. |
@@ -196,6 +196,7 @@ Item numbering is stable — the requirements document cross-references these as
 | 19 | Book monetisation: affiliate links, never files | **Decided (owner)** | No PDFs sold or shared (copyright). Weak subjects surface standard reference books (Laxmikanth, Spectrum, G.C. Leong, etc.) hyperlinked to Amazon/Flipkart searches with affiliate disclosure; AMAZON_AFFILIATE_TAG / FLIPKART_AFFILIATE_ID env vars add commission tracking once the owner registers for the affiliate programmes. |
 | 20 | Mock languages | **Decided** | Match the real exam: UPSC Prelims papers are set in English and Hindi only, so mock papers target EN + HI (Bengali remains a UI language; Hindi question bank translation needs the AI key). |
 | 21 | Database: MongoDB | **Decided (owner)** | The platform runs on MongoDB. Local development uses an embedded MongoDB automatically (zero installation, data persists in `data/mongo`); production points `MONGODB_URI` at a free MongoDB Atlas M0 cluster (Mumbai region), which also solves free-hosting data wipes. Numeric ids, one-time-purchase unlocks, deterministic paper composition, and all flows verified by an automated end-to-end test (`e2e-test.mjs`). |
+| 22 | Product name: Bodhi | **Decided (owner)** | Universal learning platform brand renamed from Learnzy to **Bodhi**. UI, certificates, admin account (`admin@bodhi.test`), cookies, docs, and package name updated accordingly. |
 
 ---
 

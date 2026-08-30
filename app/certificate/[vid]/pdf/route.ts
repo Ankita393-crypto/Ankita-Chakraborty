@@ -9,7 +9,7 @@ import { getSessionUser } from "@/lib/auth";
 // Hindi/Bengali names.
 function latinSafe(s: string): string {
   const cleaned = s.replace(/[^\x20-\x7E\u00A0-\u00FF]/g, "").trim();
-  return cleaned.length > 0 ? cleaned : "Learnzy Learner";
+  return cleaned.length > 0 ? cleaned : "Bodhi Learner";
 }
 
 export async function GET(_req: Request, { params }: { params: Promise<{ vid: string }> }) {
@@ -50,7 +50,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ vid: st
     page.drawText(text, { x: (width - w) / 2, y, size, font, color });
   };
 
-  center("LEARNZY", height - 95, bold, 34, indigo);
+  center("BODHI", height - 95, bold, 34, indigo);
   center(
     cert.kind === "quiz" ? "CERTIFICATE OF ENTRANCE EXAM ACHIEVEMENT" : "CERTIFICATE OF COURSE COMPLETION",
     height - 130,
@@ -73,8 +73,8 @@ export async function GET(_req: Request, { params }: { params: Promise<{ vid: st
   center(`Issued on ${cert.issued_at.slice(0, 10)}`, height - 385, regular, 12, slate);
 
   page.drawText(`Verification ID: ${cert.verification_id}`, { x: 55, y: 60, size: 11, font: bold, color: slate });
-  page.drawText("Verify at the Learnzy certificate verification page", { x: 55, y: 45, size: 9, font: regular, color: slate });
-  const right = "Learnzy - AI-powered learning platform";
+  page.drawText("Verify at the Bodhi certificate verification page", { x: 55, y: 45, size: 9, font: regular, color: slate });
+  const right = "Bodhi - AI-powered learning platform";
   page.drawText(right, {
     x: width - 55 - regular.widthOfTextAtSize(right, 10),
     y: 50,
@@ -87,7 +87,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ vid: st
   return new NextResponse(Buffer.from(bytes), {
     headers: {
       "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="learnzy-certificate-${cert.verification_id}.pdf"`,
+      "Content-Disposition": `attachment; filename="bodhi-certificate-${cert.verification_id}.pdf"`,
     },
   });
 }

@@ -14,7 +14,7 @@ export type SessionUser = {
   is_admin: number;
 };
 
-const SESSION_COOKIE = "learnzy_session";
+const SESSION_COOKIE = "bodhi_session";
 const SESSION_DAYS = 30;
 
 export async function createSession(userId: number) {

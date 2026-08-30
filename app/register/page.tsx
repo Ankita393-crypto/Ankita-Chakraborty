@@ -9,7 +9,7 @@ export default function RegisterPage() {
 
   return (
     <div className="max-w-md mx-auto rounded-2xl bg-white border border-slate-200 p-8">
-      <h1 className="text-2xl font-extrabold">Create your Learnzy account</h1>
+      <h1 className="text-2xl font-extrabold">Create your Bodhi account</h1>
       <p className="mt-1 text-sm text-slate-600">
         Email, phone, and an ID document are required before you can sit a paid entrance exam.
       </p>

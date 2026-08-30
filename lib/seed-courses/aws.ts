@@ -6,7 +6,7 @@ export const awsCloudPractitioner: SeedCourse = {
   slug: "aws-cloud-practitioner-prep",
   title: "AWS Cloud Practitioner — Exam Prep",
   description:
-    "Structured preparation for the AWS Certified Cloud Practitioner (CLF-C02) external exam: cloud concepts, global infrastructure, core services, networking, security, and billing. Learnzy prepares you for the exam; the certification is awarded by AWS.",
+    "Structured preparation for the AWS Certified Cloud Practitioner (CLF-C02) external exam: cloud concepts, global infrastructure, core services, networking, security, and billing. Bodhi prepares you for the exam; the certification is awarded by AWS.",
   category: "certprep",
   tier: 8,
   price_inr: 1499,

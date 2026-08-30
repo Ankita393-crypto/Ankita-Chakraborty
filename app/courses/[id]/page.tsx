@@ -109,7 +109,7 @@ export default async function CoursePage({
         <h1 className="mt-1 text-3xl font-extrabold">{course.title}</h1>
         <p className="mt-2 text-slate-600">{course.description}</p>
         <p className="mt-3 text-xs text-slate-500 italic">
-          Learnzy is not affiliated with UPSC. Papers reproduce the real pattern and static-syllabus subject mix; the
+          Bodhi is not affiliated with UPSC. Papers reproduce the real pattern and static-syllabus subject mix; the
           real exam also carries current-affairs questions that change every year.
         </p>
 
@@ -275,7 +275,7 @@ export default async function CoursePage({
       <p className="mt-3 text-xs text-slate-500 italic">{d.disclaimer}</p>
       {course.category === "certprep" ? (
         <p className="mt-1 text-xs text-slate-500">
-          Learnzy prepares you for this external certification; the certification itself is awarded by its issuing
+          Bodhi prepares you for this external certification; the certification itself is awarded by its issuing
           body.
         </p>
       ) : null}

@@ -29,7 +29,7 @@ export async function setLanguage(formData: FormData) {
   const lang = String(formData.get("lang"));
   if (["en", "hi", "bn"].includes(lang)) {
     const jar = await cookies();
-    jar.set("learnzy_lang", lang, { path: "/", maxAge: 31536000 });
+    jar.set("bodhi_lang", lang, { path: "/", maxAge: 31536000 });
   }
   revalidatePath("/", "layout");
 }

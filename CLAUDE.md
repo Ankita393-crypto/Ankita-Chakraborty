@@ -6,7 +6,7 @@ This file provides guidance to AI assistants (Claude and others) working with th
 
 **Repository:** Ankita393-crypto/Ankita-Chakraborty
 **Remote:** Configured via local proxy at `127.0.0.1:33433`
-**Status:** Learnzy pilot — a Next.js 16 (App Router) + TypeScript + Tailwind web app with MongoDB (official driver; embedded local MongoDB for dev via mongodb-memory-server, MongoDB Atlas via `MONGODB_URI` for production). End-to-end tests: `node e2e-test.mjs` (Playwright, requires the dev server running).
+**Status:** Bodhi pilot — a Next.js 16 (App Router) + TypeScript + Tailwind web app with MongoDB (official driver; embedded local MongoDB for dev via mongodb-memory-server, MongoDB Atlas via `MONGODB_URI` for production). End-to-end tests: `node e2e-test.mjs` (Playwright, requires the dev server running).
 
 - Product: AI-powered learning platform (paid entry quiz unlocks free courses; certificates; EN/HI/BN).
 - Key paths: `app/actions.ts` (all server actions/business logic), `lib/db.ts` (schema), `lib/seed.ts` (demo data), `docs/` (product plan, requirements, owner guide).

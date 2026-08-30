@@ -25,7 +25,7 @@ export default async function ExamsPage() {
       <h1 className="text-3xl font-extrabold">Government exam directory</h1>
       <p className="mt-2 text-slate-600 max-w-3xl">
         India&apos;s major government recruitment exams, the bodies that conduct them, and their current patterns —
-        cross-checked against official notifications. For each exam, the linked Learnzy courses cover the subjects it
+        cross-checked against official notifications. For each exam, the linked Bodhi courses cover the subjects it
         tests. Exam patterns can change between recruitment cycles, so always confirm details on the official website
         before applying.
       </p>
@@ -76,7 +76,7 @@ export default async function ExamsPage() {
             </div>
 
             <div className="mt-4">
-              <h3 className="text-sm font-semibold text-slate-700">Prepare on Learnzy</h3>
+              <h3 className="text-sm font-semibold text-slate-700">Prepare on Bodhi</h3>
               <div className="mt-2 flex flex-wrap gap-2">
                 {exam.subjects.map((slug) => {
                   const course = courseBySlug.get(slug);
@@ -98,7 +98,7 @@ export default async function ExamsPage() {
       </div>
 
       <p className="mt-8 text-xs text-slate-400 max-w-3xl">
-        Learnzy is a preparation platform and is not affiliated with UPSC, SSC, IBPS, SBI, the Railway Recruitment
+        Bodhi is a preparation platform and is not affiliated with UPSC, SSC, IBPS, SBI, the Railway Recruitment
         Boards, or any state Public Service Commission. Recruitment notifications, dates, fees, and patterns are
         published only on the official websites linked above.
       </p>

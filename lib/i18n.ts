@@ -90,7 +90,7 @@ export type Dict = (typeof dict)["en"];
 
 export async function getLang(): Promise<Lang> {
   const jar = await cookies();
-  const l = jar.get("learnzy_lang")?.value;
+  const l = jar.get("bodhi_lang")?.value;
   return l === "hi" || l === "bn" ? l : "en";
 }
 

@@ -1,4 +1,4 @@
-# Learnzy Owner's Guide — for a non-technical founder
+# Bodhi Owner's Guide — for a non-technical founder
 
 This guide assumes **zero coding or GitHub knowledge**. It explains what exists, how to see it, how to run your pilot session, and exactly which accounts only you can create. Keep it bookmarked — it will be updated as the product grows.
 
@@ -6,7 +6,7 @@ This guide assumes **zero coding or GitHub knowledge**. It explains what exists,
 
 ## 1. What has been built (the pilot)
 
-A working website called **Learnzy** with the full learner journey:
+A working website called **Bodhi** with the full learner journey:
 
 1. A visitor signs up with name, email, phone, and password.
 2. They verify their phone with a 6-digit code and upload an ID document (PAN, Aadhaar, driving license, student or employee ID).
@@ -31,7 +31,7 @@ Everything else — accounts, ID review, quizzes, certificates, admin panel, the
 
 ### The admin account
 
-- Email: `admin@learnzy.test`
+- Email: `admin@bodhi.test`
 - Password: `admin123`
 
 **Change this before showing the site to strangers** (ask your developer/agent to set an `ADMIN_PASSWORD`). The admin sees an extra "Admin" link in the top menu with: the ID review queue, error reports, publish/unpublish buttons for every course, and an audit log of everything that happens.
@@ -75,7 +75,7 @@ npm install
 npm run dev
 ```
 
-5. **Open your browser** at `http://localhost:3000`. That's Learnzy, running on your machine. Press `Ctrl+C` in the terminal to stop it.
+5. **Open your browser** at `http://localhost:3000`. That's Bodhi, running on your machine. Press `Ctrl+C` in the terminal to stop it.
 
 ### A note on putting the pilot on the internet
 
@@ -105,7 +105,7 @@ These must be in your name — they involve your identity, your bank, and your m
 | 2 | **Razorpay** (individual/sole-proprietor onboarding) | Real UPI + domestic card payments | razorpay.com → sign up with PAN + bank account | Free to open; ~2% per transaction |
 | 3 | **SMS provider** (MSG91 or Twilio) | Real OTP by SMS | msg91.com | Paise per SMS |
 | 4 | **Google Cloud OAuth credentials** | "Sign in with Google" button | console.cloud.google.com | Free |
-| 5 | **Domain name** | learnzy.in / learnzy.com (check availability!) | Any registrar (GoDaddy, Namecheap, Hostinger) | ~₹300–1,500/year |
+| 5 | **Domain name** | bodhi.in / bodhi.com (check availability!) | Any registrar (GoDaddy, Namecheap, Hostinger) | ~₹300–1,500/year |
 | 6 | **YouTube channel** | Hosting your AI videos + future ad revenue | youtube.com (any Google account) | Free |
 | 7 | **Hosting account** | The live website | Render / Railway / a small VPS | Free tier for pilot; ~₹400–800/month early on |
 
@@ -115,7 +115,7 @@ These must be in your name — they involve your identity, your bank, and your m
 
 ## 5A. Getting the keys, step by step (fresher edition)
 
-**What an "API key" actually is.** When Learnzy needs another company's service (OpenAI's brain, Amazon's commission tracking), it calls that company's computers over the internet. The API key is like a SIM card: it identifies *your* account so the usage — and the bill or the commission — lands on you. That's the whole mystery. A key is just a long password string you copy from their website and paste into one settings file.
+**What an "API key" actually is.** When Bodhi needs another company's service (OpenAI's brain, Amazon's commission tracking), it calls that company's computers over the internet. The API key is like a SIM card: it identifies *your* account so the usage — and the bill or the commission — lands on you. That's the whole mystery. A key is just a long password string you copy from their website and paste into one settings file.
 
 **Where keys go.** The project has a template file called `.env.example`. Make a copy named `.env.local`, fill in the values, restart the site — done. The code already knows the names (`OPENAI_API_KEY`, `AMAZON_AFFILIATE_TAG`, `FLIPKART_AFFILIATE_ID`); features switch on automatically when a value appears. `.env.local` never leaves your computer (it is deliberately excluded from GitHub). On a hosting service like Render, you don't upload the file — you type the same names/values into its **Environment Variables** page.
 
@@ -123,7 +123,7 @@ These must be in your name — they involve your identity, your bank, and your m
 
 1. Go to **platform.openai.com** (this is the developer site — different from chatgpt.com) and create an account with your email or Google.
 2. Open **Settings → Billing** and add credits. It's prepaid, minimum $5 (~₹450): you load money first, usage draws it down, and it can never charge more than you loaded. An international-enabled debit/credit card is needed.
-3. Open **API keys → "Create new secret key"**. Name it "learnzy". The key (starts with `sk-`) is shown **only once** — copy it immediately into `.env.local` as `OPENAI_API_KEY=sk-...`.
+3. Open **API keys → "Create new secret key"**. Name it "bodhi". The key (starts with `sk-`) is shown **only once** — copy it immediately into `.env.local` as `OPENAI_API_KEY=sk-...`.
 4. Restart the site. The admin page's "Generate with AI" buttons, the `/learn` study chapters, and AI course generation all come alive.
 
 *Cost sense:* the default model (gpt-4o-mini) costs fractions of a paisa per question generated. Your $5 will last the whole pilot. If a key ever leaks, log in and delete it — that kills it instantly, and you make a new one.
@@ -132,7 +132,7 @@ These must be in your name — they involve your identity, your bank, and your m
 
 1. Amazon requires a **live, public website** to approve you — so this comes *after* hosting, not before.
 2. Go to **affiliate-program.amazon.in** and sign in with any Amazon account. Fill the application: your website address, what it's about (exam preparation), how you bring visitors.
-3. You receive a **tracking ID** (also called a Store ID), e.g. `learnzy-21`. Put it in `.env.local` as `AMAZON_AFFILIATE_TAG=learnzy-21`. Every book button on the site starts carrying your commission tag automatically.
+3. You receive a **tracking ID** (also called a Store ID), e.g. `bodhi-21`. Put it in `.env.local` as `AMAZON_AFFILIATE_TAG=bodhi-21`. Every book button on the site starts carrying your commission tag automatically.
 4. **The 180-day rule:** Amazon closes accounts that don't produce **3 qualifying sales within 180 days**. You can reapply, but the cleanest path is to apply once real learners are on the site.
 5. Payouts go to your bank account after a minimum threshold; commission on books is a few percent of the sale.
 
@@ -163,23 +163,34 @@ Until either exists, the Flipkart buttons still work perfectly as plain links; y
 
 ## 5B. Your database: MongoDB Atlas, step by step (free)
 
-**What this is.** The database is where everything lives: accounts, payments, exam attempts, certificates. On your own computer, Learnzy runs a built-in database automatically — you install nothing, and the data sits in the project's `data/mongo` folder. That's perfect for testing. But for the live website you want the database in the cloud, so it's never wiped when the hosting service restarts, and it's backed up by professionals. MongoDB Atlas is the official cloud service, and its smallest tier (called **M0**) is genuinely free forever — no card required.
+**What this is.** The database is where everything lives: accounts, payments, exam attempts, certificates. On your own computer, Bodhi runs a built-in database automatically — you install nothing, and the data sits in the project's `data/mongo` folder. That's perfect for testing. But for the live website you want the database in the cloud, so it's never wiped when the hosting service restarts, and it's backed up by professionals. MongoDB Atlas is the official cloud service, and its smallest tier (called **M0 / Free**) is genuinely free forever — no card required.
 
-**Setting it up (about 10 minutes):**
+**What the three buttons on "Create New Cluster" mean (the screen you are on now):**
 
-1. Go to **mongodb.com/cloud/atlas** and click "Try Free". Sign up with your email or Google.
-2. It asks you to create a **cluster** (that's just their word for "your database server"). Choose the **M0 Free** tier, pick the **Mumbai (ap-south-1)** region — closest to your learners — and click Create. Leave every other setting as-is.
-3. **Create a database user** (this is not your Atlas login — it's the username/password the *website* uses to talk to the database). Atlas prompts you for this. Username: `learnzy`. Click "Autogenerate password" and **copy the password somewhere safe immediately**.
-4. **Network access:** Atlas asks which computers may connect. For the pilot choose **"Allow access from anywhere" (0.0.0.0/0)** — the database still requires the password; this only skips address-by-address approval. (Later, this can be tightened to just your hosting service's addresses.)
-5. Click **Connect → Drivers**, and Atlas shows your **connection string** — one long address that looks like:
-   `mongodb+srv://learnzy:<password>@cluster0.ab1cd.mongodb.net/`
-   Replace `<password>` (including the angle brackets) with the password from step 3.
-6. Paste it into `.env.local` as `MONGODB_URI=mongodb+srv://learnzy:...` — or, on your hosting service, add `MONGODB_URI` on its Environment Variables page. Restart the site. Done: Learnzy now reads and writes to your cloud database, and seeds the demo courses into it automatically on first run.
+| Button | Meaning | For Bodhi? |
+|---|---|---|
+| **Free** | Shared server, 512 MB storage, $0 forever | **Yes — choose this** |
+| **Flex** | Pay-as-you-go (about $0.011/hour, capped near $30/month) | No — skip for the pilot |
+| **Dedicated** | Your own paid server for large products | No — far too early |
+
+If **Flex** is highlighted in green and the bottom bar shows a price, click **Free** first. The bottom price should become **$0.00**. Keep **AWS** and **Mumbai (ap-south-1)** — that region is already the right choice for Indian learners.
+
+**Then finish setup:**
+
+1. Click **Create Cluster** (only after Free is selected and the price is $0.00).
+2. **Create a database user** (this is not your Atlas login — it's the username/password the *website* uses to talk to the database). Username: `bodhi`. Click "Autogenerate password" and **copy the password somewhere safe immediately**.
+3. **Network access:** choose **"Allow access from anywhere" (0.0.0.0/0)** for the pilot — the database still requires the password; this only skips address-by-address approval.
+4. Click **Connect → Drivers**, and Atlas shows your **connection string** — one long address that looks like:
+   `mongodb+srv://bodhi:<password>@cluster0.ab1cd.mongodb.net/`
+   Replace `<password>` (including the angle brackets) with the password from step 2.
+5. Paste it into `.env.local` as `MONGODB_URI=mongodb+srv://bodhi:...` — or, on your hosting service, add `MONGODB_URI` on its Environment Variables page. Restart the site. Done: Bodhi now reads and writes to your cloud database, and seeds the demo courses into it automatically on first run.
 
 **Rules of thumb:**
 - The connection string contains your database password — treat it exactly like an API key (never in chat/email/WhatsApp).
 - The free M0 tier holds 512 MB — far more than the whole pilot will use.
 - Your Atlas dashboard has a "Browse Collections" button: you can literally *see* your users, payments, and certificates there. Look but don't edit by hand.
+- If Atlas ever asks for a credit card to "upgrade", you can decline. Free does not require a card.
+- Free clusters can pause after ~60 days of total inactivity; one visit wakes them. With real learners this does not happen.
 
 ---
 
