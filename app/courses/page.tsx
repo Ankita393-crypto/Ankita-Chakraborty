@@ -74,7 +74,7 @@ export default async function CoursesPage() {
                 <p className="mt-1 text-sm text-slate-600 line-clamp-2">{c.description}</p>
                 <div className="mt-3 text-sm font-semibold text-slate-700">
                   {c.category === "mock"
-                    ? `₹${c.price_inr} one-time · ${c.paper_count ?? 1} papers · Answer papers & weakness reports`
+                    ? `₹${c.price_inr} one-time · Unlimited retakes · Answer papers & weakness reports`
                     : `Entrance exam ₹${c.price_inr} · Course free`}
                 </div>
               </Link>

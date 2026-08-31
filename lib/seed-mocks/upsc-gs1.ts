@@ -15,14 +15,17 @@ import { partC } from "./upsc-gs1-part-c";
 // this is disclosed on the mock's page.)
 export const upscGs1Mock: SeedMock = {
   slug: "upsc-prelims-gs1-mock-series",
-  title: "UPSC Prelims GS Paper I — Mock Series (1000 papers)",
+  title: "UPSC Prelims GS Paper I — Mock Series",
   description:
-    "One payment, one thousand full-length simulations of UPSC Civil Services Prelims GS Paper I: 100 questions in 2 hours with real negative marking (+2 / −0.67). Every paper comes with a complete answer paper — every question explained — and a subject-wise weakness report with book recommendations.",
+    "One payment, unlimited retakes from a growing bank of verified questions. Full-length simulation of UPSC Civil Services Prelims GS Paper I: 100 questions in 2 hours with real negative marking (+2 / −0.67). Every paper comes with a complete answer paper — every question explained — and a subject-wise weakness report with book recommendations. Currently one full-length paper; more are added as new questions pass verification.",
   price_inr: 249,
   exam_minutes: 120,
   marks_correct: 2,
   marks_wrong: 2 / 3,
-  paper_count: 1000,
+  // Honest labelling (Decisions #27/#28): the bank holds exactly 100 verified
+  // questions and a paper takes 100, so only one distinct paper exists today.
+  // Raise this as the verified bank grows past the paper size.
+  paper_count: 1,
   paper_size: 100,
   // Real paper's static-syllabus mix (sums to 100).
   subject_quota: {

@@ -25,7 +25,7 @@ export type SeedMock = {
   exam_minutes: number;
   marks_correct: number;
   marks_wrong: number; // deducted per wrong answer
-  paper_count: number; // papers in the series, e.g. 1000
+  paper_count: number; // numbered papers offered today (honest labelling, Decision #27 — grows with the bank)
   paper_size: number; // questions per paper, e.g. 100
   subject_quota: Record<string, number>; // real paper's per-subject question mix
   questions: MockQuestion[]; // the question BANK papers are composed from

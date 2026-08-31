@@ -24,12 +24,15 @@ export const upscCsatMock: SeedMock = {
   slug: "upsc-prelims-csat-mock-series",
   title: "UPSC Prelims CSAT (Paper II) — Mock Series",
   description:
-    "Simulation of UPSC Prelims CSAT: comprehension, logical reasoning, and basic numeracy on the real pattern — 80 questions, 2 hours, +2.5 / −0.83 marking (qualifying paper: 33% needed in the real exam). One payment unlocks the full series; papers are composed from a growing verified question bank.",
+    "Simulation of UPSC Prelims CSAT: comprehension, logical reasoning, and basic numeracy on the real pattern — 80 questions, 2 hours, +2.5 / −0.83 marking (qualifying paper: 33% needed in the real exam). One payment unlocks the full series — unlimited retakes from a growing bank of verified questions.",
   price_inr: 249,
   exam_minutes: 120,
   marks_correct: 2.5,
   marks_wrong: 2.5 / 3,
-  paper_count: 1000,
+  // Honest labelling (Decision #27): with a 100-question bank and 80-question
+  // papers, numbered papers overlap heavily (disclosed in the UI). Offer a
+  // modest numbered set and raise this as the verified bank grows.
+  paper_count: 10,
   paper_size: 80,
   subject_quota: { [COMP]: 26, [REAS]: 30, [NUM]: 24 },
   questions: [

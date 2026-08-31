@@ -117,18 +117,18 @@ try {
   // 5. Buy GS series
   await page.goto(`${BASE}/courses`);
   await page.getByRole("link", { name: /GS Paper I — Mock Series/ }).click();
-  await page.waitForSelector("text=/Unlock all 1000 papers/");
+  await page.waitForSelector("text=/Unlock the full series/");
   await page.getByRole("button", { name: /Buy the series/ }).click();
   await page.waitForSelector("text=/series unlocked/");
   const gridCount = await page.locator('a[href*="quiz?paper="]').count();
-  gridCount === 100 ? ok("5 series bought, grid 1-100") : fail("5 grid", `expected 100 links, got ${gridCount}`);
+  gridCount === 1 ? ok("5 series bought, grid shows 1 paper (honest labelling)") : fail("5 grid", `expected 1 link, got ${gridCount}`);
   const seriesUrl = page.url();
 
-  // 6. Sit paper 7, answer first two questions with option A
-  await page.click('a[href$="quiz?paper=7"]');
-  await page.waitForSelector("text=/Paper 7/");
+  // 6. Sit paper 1, answer first two questions with option A
+  await page.click('a[href$="quiz?paper=1"]');
+  await page.waitForSelector("text=/Paper 1/");
   const bodyText = await page.textContent("body");
-  /1:5\d:\d\d|2:00:00/.test(bodyText) ? ok("6a paper 7 opened with ~2h timer") : fail("6a timer", bodyText.slice(0, 120));
+  /1:5\d:\d\d|2:00:00/.test(bodyText) ? ok("6a paper 1 opened with ~2h timer") : fail("6a timer", bodyText.slice(0, 120));
   const radios = page.locator('input[type="radio"]');
   await radios.nth(0).check();
   await radios.nth(4).check();
@@ -148,10 +148,10 @@ try {
 
   // 8. Grid shows attempt
   await page.goto(seriesUrl);
-  const paper7 = page.locator('a[href$="quiz?paper=7"]');
-  (await paper7.getAttribute("class")).includes("emerald")
-    ? ok("8 paper 7 green in grid", `label "${(await paper7.textContent()).trim()}"`)
-    : fail("8 grid state", await paper7.getAttribute("class"));
+  const paper1 = page.locator('a[href$="quiz?paper=1"]');
+  (await paper1.getAttribute("class")).includes("emerald")
+    ? ok("8 paper 1 green in grid", `label "${(await paper1.textContent()).trim()}"`)
+    : fail("8 grid state", await paper1.getAttribute("class"));
 
   // 9. Entrance exam (Class 10 Maths): answer honestly-correctly by reading
   // the answer key from the database, to exercise the PASS + certificate path.

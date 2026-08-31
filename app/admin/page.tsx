@@ -224,8 +224,8 @@ export default async function AdminPage() {
       <section>
         <h2 className="text-lg font-bold">Mock series question banks</h2>
         <p className="mt-1 text-sm text-slate-500">
-          Papers are composed by combination from these banks — the bigger the bank, the more distinct the 1000
-          papers become. AI-generated questions are tagged <span className="font-mono text-xs">ai</span> for
+          Papers are composed by combination from these banks — the bigger the bank, the more distinct papers the
+          series can offer. AI-generated questions are tagged <span className="font-mono text-xs">ai</span> for
           spot-checking; hand-verified seed questions are tagged <span className="font-mono text-xs">seed</span>.
           {!aiAvailable() ? (
             <span className="text-amber-700 font-semibold"> AI generation is off: no OPENAI_API_KEY configured.</span>

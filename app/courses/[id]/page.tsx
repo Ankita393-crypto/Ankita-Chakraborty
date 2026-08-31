@@ -116,7 +116,9 @@ export default async function CoursePage({
         <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div className="rounded-2xl bg-white border border-slate-200 p-4 text-center">
             <div className="text-xl font-extrabold text-slate-800">{paperCount}</div>
-            <div className="text-xs text-slate-500 mt-1">Papers in the series</div>
+            <div className="text-xs text-slate-500 mt-1">
+              {paperCount === 1 ? "Paper today (bank growing)" : "Papers today (bank growing)"}
+            </div>
           </div>
           <div className="rounded-2xl bg-white border border-slate-200 p-4 text-center">
             <div className="text-xl font-extrabold text-slate-800">
@@ -147,10 +149,11 @@ export default async function CoursePage({
         {!isUnlocked ? (
           <div className="mt-6 rounded-2xl bg-white border border-indigo-200 p-6">
             <h2 className="font-bold text-lg">
-              Unlock all {paperCount} papers — ₹{course.price_inr}, one-time
+              Unlock the full series — ₹{course.price_inr}, one-time
             </h2>
             <p className="mt-1 text-sm text-slate-600">
-              One payment opens the entire series: sit any paper, any number of times. Every paper is followed by a
+              One payment opens the entire series: unlimited retakes from a growing bank of verified questions —
+              sit any paper, any number of times. Every paper is followed by a
               complete answer paper (every question explained) and a subject-wise weakness report with book
               recommendations. Payments are final — no refunds.
             </p>
@@ -193,7 +196,9 @@ export default async function CoursePage({
                 Your papers <span className="text-sm font-semibold text-emerald-600">(series unlocked)</span>
               </h2>
               <span className="text-xs text-slate-500">
-                Papers {firstPaper}–{lastPaper} of {paperCount}
+                {totalPages > 1
+                  ? `Papers ${firstPaper}–${lastPaper} of ${paperCount}`
+                  : `${paperCount} ${paperCount === 1 ? "paper" : "papers"} today · more added as questions are verified`}
               </span>
             </div>
             <p className="mt-1 text-sm text-slate-600">
